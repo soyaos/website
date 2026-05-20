@@ -1,0 +1,76 @@
+---
+import Marketing from "../layouts/Marketing.astro";
+
+const stories = [
+  {
+    name: "Compo",
+    tagline: "Printable essay-tutoring for parents.",
+    body: "Upload a sample, get an A4 writing guide. The DD-008 flagship.",
+    href: "https://github.com/soyaos/example-essay-tutor",
+  },
+  {
+    name: "NewsBeam",
+    tagline: "Domain-specific news radar.",
+    body: "Topic-aware crawling, deduping, summarization. Hand-tunable feeds.",
+    href: "#",
+  },
+  {
+    name: "EstateMuse",
+    tagline: "Listing copy that doesn't sound AI.",
+    body: "Photos + facts in, lyrical neighborhood copy out, with provenance.",
+    href: "#",
+  },
+  {
+    name: "SilentCut",
+    tagline: "Quiet cinema, automatically.",
+    body: "Long-form video into rhythmic shorts. Music + cuts + captions.",
+    href: "#",
+  },
+];
+---
+
+<Marketing>
+  <section class="py-12">
+    <p class="text-xs uppercase tracking-[0.2em] text-soya-accent">Alpha</p>
+    <h1 class="mt-3 text-5xl font-semibold tracking-tight md:text-6xl">
+      SoyaOS
+    </h1>
+    <p class="mt-4 max-w-2xl text-lg text-soya-ink/70">
+      An Agent Operating System. One binary, six editions, three node roles
+      (Planet / Moon / Comet). MIT-licensed, runs on your laptop, scales to
+      your cluster.
+    </p>
+    <div class="mt-8 flex flex-wrap gap-3">
+      <a
+        href="/docs"
+        class="inline-flex items-center rounded-md bg-soya-ink px-5 py-2.5 text-sm font-medium text-soya-paper hover:bg-soya-ink/90"
+        >Read the docs</a
+      >
+      <a
+        href="https://github.com/soyaos/soyaos"
+        class="inline-flex items-center rounded-md border border-soya-ink/15 px-5 py-2.5 text-sm font-medium hover:border-soya-accent"
+        >Source on GitHub</a
+      >
+    </div>
+  </section>
+
+  <section class="mt-8">
+    <h2 class="text-sm uppercase tracking-[0.2em] text-soya-ink/60">
+      Flagship Agents
+    </h2>
+    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+      {
+        stories.map((s) => (
+          <a
+            href={s.href}
+            class="group rounded-xl border border-soya-ink/10 bg-white/40 p-6 transition hover:-translate-y-0.5 hover:border-soya-accent hover:shadow-sm"
+          >
+            <h3 class="text-lg font-medium tracking-tight">{s.name}</h3>
+            <p class="mt-1 text-sm font-medium text-soya-accent">{s.tagline}</p>
+            <p class="mt-3 text-sm text-soya-ink/70">{s.body}</p>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+</Marketing>

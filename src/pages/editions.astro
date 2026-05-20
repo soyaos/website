@@ -1,0 +1,86 @@
+---
+import Marketing from "../layouts/Marketing.astro";
+
+const editions = [
+  {
+    name: "Spark",
+    tagline: "Local-first single binary.",
+    nodes: "Comet",
+    audience: "Individual builders, demos.",
+    cost: "Free",
+  },
+  {
+    name: "Studio",
+    tagline: "Solo creator, GUI included.",
+    nodes: "Moon",
+    audience: "Indie publishers, prosumers.",
+    cost: "Free",
+  },
+  {
+    name: "Atelier",
+    tagline: "Small studio, multi-user.",
+    nodes: "Moon + Comet",
+    audience: "5–30 person creator studios.",
+    cost: "Free (alpha)",
+  },
+  {
+    name: "Forge",
+    tagline: "Self-hosted production.",
+    nodes: "Planet + Moon + Comet",
+    audience: "SMB / enterprise on-prem.",
+    cost: "Free (alpha)",
+  },
+  {
+    name: "Constellation",
+    tagline: "Multi-region federated.",
+    nodes: "Multi-Planet mesh",
+    audience: "Global teams, regulated data.",
+    cost: "Free (alpha)",
+  },
+  {
+    name: "Pulsar",
+    tagline: "Managed cloud.",
+    nodes: "Hosted Planet",
+    audience: "Teams that want zero ops.",
+    cost: "TBD",
+  },
+];
+---
+
+<Marketing title="Editions · SoyaOS">
+  <section class="py-8">
+    <h1 class="text-3xl font-semibold tracking-tight md:text-4xl">Editions</h1>
+    <p class="mt-3 max-w-2xl text-soya-ink/70">
+      SoyaOS ships as one binary. The <em>edition</em> is a deployment
+      shape — which node roles you run, who runs them, and how they
+      federate.
+    </p>
+  </section>
+
+  <section class="overflow-x-auto rounded-xl border border-soya-ink/10 bg-white/40">
+    <table class="min-w-full text-sm">
+      <thead class="bg-soya-subtle/50 text-left text-xs uppercase tracking-wider text-soya-ink/70">
+        <tr>
+          <th class="px-4 py-3">Edition</th>
+          <th class="px-4 py-3">Tagline</th>
+          <th class="px-4 py-3">Node roles</th>
+          <th class="px-4 py-3">Audience</th>
+          <th class="px-4 py-3">Alpha cost</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-soya-ink/5">
+        {
+          editions.map((e) => (
+            <tr>
+              <td class="px-4 py-3 font-medium">{e.name}</td>
+              <td class="px-4 py-3 text-soya-ink/80">{e.tagline}</td>
+              <td class="px-4 py-3 text-soya-ink/80">{e.nodes}</td>
+              <td class="px-4 py-3 text-soya-ink/80">{e.audience}</td>
+              <td class="px-4 py-3 text-soya-ink/80">{e.cost}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </section>
+</Marketing>
