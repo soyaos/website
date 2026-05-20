@@ -4,12 +4,25 @@ import "../styles/globals.css";
 interface Props {
   title?: string;
   description?: string;
+  path?: string;
 }
 
 const {
   title = "SoyaOS — Agent Operating System",
-  description = "One binary, six editions, three node roles. The Agent Operating System for the post-LLM era.",
+  description = "One binary, six editions, three node roles. SoyaOS gets out of your way: bring your own LLM, deploy any Agent as an OpenAI-compatible model.",
+  path,
 } = Astro.props;
+
+// Canonical URL — fall back to Astro's resolved pathname.
+const canonicalPath =
+  path ?? (Astro.url.pathname === "/" ? "/" : Astro.url.pathname.replace(/\/$/, ""));
+const canonical = `https://soyaos.ai${canonicalPath === "/" ? "" : canonicalPath}`;
+
+const nav = [
+  { label: "Editions", href: "/editions" },
+  { label: "Pricing", href: "/pricing" },
+  { label: "Docs", href: "/docs" },
+];
 ---
 
 <!doctype html>
@@ -17,42 +30,105 @@ const {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#FBFAF5" />
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" href="/favicon.svg" />
+
+    {/* Open Graph */}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SoyaOS" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content="https://soyaos.ai/og.png" />
+    <meta property="og:locale" content="en_US" />
+
+    {/* Twitter */}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content="https://soyaos.ai/og.png" />
+
+    {/* Webfonts — Plus Jakarta Sans + IBM Plex Mono + Noto Sans SC fallback. */}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&display=swap"
+    />
+
     <title>{title}</title>
   </head>
-  <body class="min-h-screen flex flex-col font-sans">
-    <header class="border-b border-soya-ink/10">
-      <div class="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
+  <body class="min-h-screen flex flex-col font-sans antialiased">
+    <header class="soya-nav sticky top-0 z-40 border-b border-soya-border">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <a href="/" class="flex items-center gap-2 font-semibold tracking-tight">
-          <span class="inline-block h-3 w-3 rounded-full bg-soya-accent"></span>
-          <span>SoyaOS</span>
+          <span class="text-xl leading-none" aria-hidden="true">🫘</span>
+          <span class="text-[15px]">SoyaOS</span>
+          <span
+            class="ml-2 hidden rounded-full bg-soya-skin px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-soya-accentDeep sm:inline-block"
+            >alpha</span
+          >
         </a>
-        <nav class="text-sm flex items-center gap-6">
-          <a href="/editions" class="hover:text-soya-accent">Editions</a>
-          <a href="/pricing" class="hover:text-soya-accent">Pricing</a>
-          <a href="/docs" class="hover:text-soya-accent">Docs</a>
+        <nav class="flex items-center gap-7 text-[14px]">
+          {
+            nav.map((item) => (
+              <a href={item.href} class="soya-link">
+                {item.label}
+              </a>
+            ))
+          }
           <a
             href="https://github.com/soyaos/soyaos"
-            class="hover:text-soya-accent"
-            rel="noopener"
-            >GitHub</a
+            class="soya-link"
+            rel="noopener noreferrer"
+            target="_blank">GitHub</a
           >
         </nav>
       </div>
     </header>
 
-    <main class="flex-1 mx-auto w-full max-w-6xl px-6 py-12">
+    <main class="flex-1">
       <slot />
     </main>
 
-    <footer class="border-t border-soya-ink/10 text-xs text-soya-ink/60">
-      <div class="mx-auto max-w-6xl px-6 py-6 flex flex-wrap items-center justify-between gap-2">
-        <span>&copy; 2026 SoyaOS Contributors &middot; MIT</span>
-        <span>
-          <a href="https://docs.soyaos.ai" class="hover:text-soya-accent">docs</a>
-          &middot;
-          <a href="https://developer.soyaos.ai" class="hover:text-soya-accent">developer</a>
-        </span>
+    <footer class="mt-24 border-t border-soya-border">
+      <div
+        class="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-10 text-[13px] text-soya-mute sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div class="flex items-center gap-2">
+          <span class="text-lg" aria-hidden="true">🫘</span>
+          <span class="font-semibold text-soya-ink">SoyaOS</span>
+          <span class="opacity-60">· Agent OS · MIT-licensed</span>
+        </div>
+        <nav class="flex flex-wrap items-center gap-x-5 gap-y-2">
+          <a href="/editions" class="hover:text-soya-accent">Editions</a>
+          <a href="/pricing" class="hover:text-soya-accent">Pricing</a>
+          <a
+            href="https://docs.soyaos.ai"
+            class="hover:text-soya-accent"
+            rel="noopener noreferrer"
+            target="_blank">Docs</a
+          >
+          <a
+            href="https://github.com/soyaos/soyaos"
+            class="hover:text-soya-accent"
+            rel="noopener noreferrer"
+            target="_blank">GitHub</a
+          >
+          <a
+            href="https://github.com/soyaos/soyaos/blob/main/LICENSE"
+            class="hover:text-soya-accent"
+            rel="noopener noreferrer"
+            target="_blank">LICENSE</a
+          >
+          <span class="opacity-40" aria-hidden="true">·</span>
+          <span class="opacity-70">Discord (soon)</span>
+        </nav>
+        <div class="text-[12px] opacity-60">© 2026 SoyaOS Contributors</div>
       </div>
     </footer>
   </body>

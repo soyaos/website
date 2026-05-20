@@ -9,6 +9,7 @@
 # Node / Bun
 node_modules/
 bun.lockb
+# bun.lock (text lockfile, bun >= 1.3) is checked in for reproducible CI builds.
 npm-debug.log*
 
 # Astro
