@@ -1,5 +1,11 @@
 name: Deploy to Cloudflare Pages
 
+# Build the Astro site and publish to the Cloudflare Pages project
+# `soyaos-website`. First push creates the Pages project; subsequent
+# pushes produce a new deployment. Custom domains (apex `soyaos.ai`
+# + `www.soyaos.ai` → 301 → apex) are managed out-of-band — see the
+# Deploy section in README.md.
+
 on:
   push:
     branches: [main]
@@ -15,6 +21,7 @@ concurrency:
 
 jobs:
   deploy:
+    name: Build + deploy
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -35,11 +42,11 @@ jobs:
         run: bun run build
 
       - name: Publish to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: soyaos-website
-          directory: dist
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          branch: main
+          # `--branch=main` pins the Pages deployment to the production
+          # branch so this run is treated as a production deployment
+          # rather than a preview.
+          command: pages deploy dist --project-name=soyaos-website --branch=main

@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="public/logo.png" alt="SoyaOS" width="120" height="120" />
+</p>
+
 # website
 
 Source for **[soyaos.ai](https://soyaos.ai)** — the SoyaOS marketing site.
@@ -6,12 +10,25 @@ Static-rendered with Astro 5 + Tailwind, deployed to **Cloudflare Pages**.
 
 ## Pages (alpha)
 
-| Path        | Purpose                                                      |
-| ----------- | ------------------------------------------------------------ |
-| `/`         | Hero + four flagship Agent stories + Why SoyaOS              |
-| `/editions` | Comparison matrix for the six editions (Solo → Ent-Private)  |
-| `/pricing`  | "Free for everyone" during alpha + post-GA monetization plan |
-| `/docs`     | Meta-redirect to <https://docs.soyaos.ai>                    |
+All paths carry a locale prefix (`/zh`, `/zh-hant`, `/en`). The bare `/` is
+handled by `public/_worker.js` on Cloudflare Pages — it negotiates
+`Accept-Language` and 302-redirects to `/<locale>/`. Local dev and any
+non-CF host fall back to `src/pages/index.astro` which does the same
+negotiation client-side.
+
+| Path                       | Purpose                                                       |
+| -------------------------- | ------------------------------------------------------------- |
+| `/<locale>/`               | Hero + four flagship Agent stories + Why SoyaOS               |
+| `/<locale>/editions`       | Comparison matrix for the six editions (Solo → Ent-Private)   |
+| `/<locale>/pricing`        | "Free for everyone" during alpha + post-GA monetization plan  |
+| `/<locale>/docs`           | Docs landing — sections + intro                               |
+| `/<locale>/docs/<slug>`    | Individual docs (quickstart / architecture / editions / …)    |
+
+Docs source markdown lives under `src/content/docs/<locale>/<slug>.md` and is
+rendered through Astro's content collections. Search is powered by
+[Pagefind](https://pagefind.app/) — the post-build step (`pagefind --site
+dist`) indexes pages tagged with `data-pagefind-body` (just the docs
+articles) into per-locale indexes.
 
 ## Local dev
 
@@ -71,14 +88,37 @@ records automatically when you assign the domain.
 
 | Subdomain               | Source repo                                            |
 | ----------------------- | ------------------------------------------------------ |
-| `docs.soyaos.ai`        | `soyaos/docs` (Docusaurus)                             |
 | `developer.soyaos.ai`   | `soyaos/developer-portal`                              |
+
+> **Note:** docs used to live at `docs.soyaos.ai` on a separate Docusaurus
+> repo. The docs are now part of this site at `/<locale>/docs`. If
+> `docs.soyaos.ai` is still pointed anywhere, set it up as a 301 redirect
+> to `https://soyaos.ai/zh/docs/` (or the appropriate locale) in your
+> Cloudflare DNS / Pages config.
 
 ## Build
 
 - **Build command**: `bun run build` (or `npm run build`).
 - **Output directory**: `dist/`.
 - **Node version**: 20.x. Bun 1.1+ works in CI too.
+
+## Deploy
+
+`main` is auto-deployed to the Cloudflare Pages project
+`soyaos-website` by `.github/workflows/deploy.yml` on every push.
+Apex `soyaos.ai` and `www.soyaos.ai` are bound to that Pages project
+via the Cloudflare dashboard; `www.soyaos.ai` is configured as a 301
+Single Redirect Rule to `https://soyaos.ai${http.request.uri.path}`.
+
+Required repo secrets (Settings → Secrets and variables → Actions):
+
+| Secret                  | Notes                                                     |
+| ----------------------- | --------------------------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`  | Pages:Edit (least privilege).                             |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account that owns the Pages project.           |
+
+Rollback: `wrangler pages deployment list --project-name=soyaos-website`
+and promote a previous deployment from the dashboard.
 
 ## License
 
