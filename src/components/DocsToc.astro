@@ -1,0 +1,76 @@
+---
+import { getDictionary } from "../i18n/dictionaries";
+import type { Locale } from "../i18n/config";
+import type { MarkdownHeading } from "astro";
+
+interface Props {
+  locale: Locale;
+  headings: MarkdownHeading[];
+}
+
+const { locale, headings } = Astro.props;
+const dict = getDictionary(locale);
+
+// Show H2 + H3 only — H1 is the article title (rendered separately), and H4+
+// is too noisy for a sidebar list. Indent H3 to express the hierarchy.
+const tocItems = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
+---
+
+{
+  tocItems.length > 0 && (
+    <nav class="docs-toc text-[13px]" aria-label="Table of contents">
+      <p class="soya-eyebrow mb-3">{dict.docs.onThisPage}</p>
+      <ul class="space-y-1.5">
+        {tocItems.map((h) => (
+          <li class={h.depth === 3 ? "pl-3" : ""}>
+            <a
+              href={`#${h.slug}`}
+              class="block text-soya-mute hover:text-soya-accent"
+              data-toc-link
+              data-toc-slug={h.slug}
+            >
+              {h.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
+
+<script>
+  // Highlight the heading currently in view. Plain IntersectionObserver —
+  // no library, no framework. Stays sticky-aware via the rootMargin trick:
+  // we only count a heading as "active" once its top crosses the top 40%
+  // of the viewport, which matches how readers actually scan.
+  const links = document.querySelectorAll<HTMLAnchorElement>("[data-toc-link]");
+  if (links.length > 0) {
+    const bySlug = new Map<string, HTMLAnchorElement>();
+    for (const l of links) {
+      const slug = l.dataset.tocSlug;
+      if (slug) bySlug.set(slug, l);
+    }
+
+    const activate = (slug: string | null) => {
+      for (const l of links) l.classList.remove("text-soya-accent", "font-semibold");
+      if (!slug) return;
+      const target = bySlug.get(slug);
+      if (target) target.classList.add("text-soya-accent", "font-semibold");
+    };
+
+    const headings = Array.from(bySlug.keys())
+      .map((slug) => document.getElementById(slug))
+      .filter((el): el is HTMLElement => !!el);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+        if (visible?.target?.id) activate(visible.target.id);
+      },
+      { rootMargin: "-40% 0px -55% 0px", threshold: [0, 1] },
+    );
+    for (const h of headings) observer.observe(h);
+  }
+</script>

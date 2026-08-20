@@ -1,0 +1,37 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { withLocale, isLocale, type Locale } from "../i18n/config";
+
+/*
+ * Internal link that auto-prefixes the current locale. Absolute http(s)
+ * URLs, hash links, mailto: / tel:, and protocol-relative URLs pass through
+ * unchanged so external destinations and on-page anchors are not corrupted.
+ *
+ * Locale defaults to Astro.params.locale (set when the page lives under
+ * src/pages/[locale]/...). Pass locale explicitly only when rendering from
+ * a context where params are not available.
+ */
+interface Props extends Omit<HTMLAttributes<"a">, "href"> {
+  href: string;
+  locale?: Locale;
+}
+
+const { href, locale: explicitLocale, ...rest } = Astro.props;
+
+const paramLocale = Astro.params.locale;
+const locale: Locale = explicitLocale ?? (isLocale(paramLocale) ? paramLocale : (() => {
+  throw new Error(
+    "<LocaleLink> requires either an explicit `locale` prop or a route under [locale]/.",
+  );
+})());
+
+const isExternal =
+  /^([a-z]+:)?\/\//i.test(href) ||
+  href.startsWith("mailto:") ||
+  href.startsWith("tel:") ||
+  href.startsWith("#");
+
+const final = isExternal ? href : withLocale(locale, href);
+---
+
+<a href={final} {...rest}><slot /></a>

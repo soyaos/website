@@ -1,244 +1,130 @@
 ---
-import Marketing from "../layouts/Marketing.astro";
-
-const stories = [
-  {
-    id: "DD-008",
-    emoji: "📝",
-    name: "Compo",
-    persona: "Parents tutoring grade-school writing",
-    aha: "Drop a model essay + topic; print an A4 writing guide your kid can actually follow.",
-    repo: "https://github.com/soyaos/example-essay-tutor",
-  },
-  {
-    id: "DD-009",
-    emoji: "📡",
-    name: "NewsBeam",
-    persona: "Knowledge workers tracking a beat",
-    aha: 'Type "watch USB-C policy in EU" in Chinese — get a long-image digest in DingTalk at 9am daily.',
-    repo: "https://github.com/soyaos/example-newsbeam",
-  },
-  {
-    id: "DD-010",
-    emoji: "🏘️",
-    name: "EstateMuse",
-    persona: "Real-estate self-media operators",
-    aha: 'One sentence in → 500-row Excel out; each row has a "make post / make reel" button that just works.',
-    repo: "https://github.com/soyaos/example-estatemuse",
-  },
-  {
-    id: "DD-011",
-    emoji: "🎬",
-    name: "SilentCut",
-    persona: "Solo short-video creators",
-    aha: "Natural-language brief → Remotion timeline → Comet renders MP4 → lands on your NAS overnight.",
-    repo: "https://github.com/soyaos/example-silentcut",
-  },
-];
-
-const whys = [
-  {
-    title: "One binary, six editions",
-    body: "Solo on a laptop to Enterprise on-prem. Same kernel, same SoyaPack manifest format, different deployment shapes. You graduate without rewriting.",
-  },
-  {
-    title: "OpenAI-compatible in & out",
-    body: "Talk to SoyaOS through any OpenAI SDK. SoyaOS talks to any OpenAI-compatible upstream. Bring your own LLM — Claude, GPT, Qwen, a local Ollama — and swap freely.",
-  },
-  {
-    title: "MIT-licensed, fail-closed by default",
-    body: "Capability tokens, signed SoyaPacks, an end-to-end audit trail in SoyaScope. No telemetry, no phone-home — your agents stay on your hardware unless you say otherwise.",
-  },
-];
+/*
+ * Root-path fallback for non-Cloudflare hosts and local dev.
+ *
+ * On production (Cloudflare Pages) public/_worker.js intercepts every request
+ * for `/` before the static asset is served, negotiates Accept-Language, and
+ * 302-redirects to the right /<locale>. This file is what gets shown if that
+ * worker is missing — e.g. running `astro dev` / `astro preview` locally, or
+ * deploying to a host that doesn't honor `_worker.js`. The inline script does
+ * the equivalent negotiation client-side; the visible fallback covers users
+ * with JS disabled.
+ *
+ * Kept deliberately minimal (no Marketing layout, no nav) so this page never
+ * lingers long enough to need full chrome.
+ */
+const locales = ["zh", "zh-hant", "en"];
+const defaultLocale = "zh";
+const unmatchedLocale = "en";
 ---
 
-<Marketing>
-  {/* ───────── Hero ───────── */}
-  <section class="soya-hero-wash">
-    <div class="mx-auto grid max-w-6xl gap-10 px-6 py-20 md:grid-cols-[1.1fr_1fr] md:py-28 md:gap-14">
-      <div>
-        <span class="soya-pill">
-          <span class="inline-block h-1.5 w-1.5 rounded-full bg-soya-edamame"></span>
-          Public alpha · v0.1
-        </span>
-        <h1
-          class="mt-5 text-[44px] font-bold leading-[1.06] tracking-[-0.022em] text-soya-ink md:text-[60px]"
-        >
-          Agent Operating System —
-          <span class="block text-soya-accentDeep">one binary, six editions, three node roles.</span>
-        </h1>
-        <p class="mt-5 max-w-xl text-[17px] leading-[1.6] text-soya-mute md:text-[18px]">
-          SoyaOS gets out of your way. Bring your own LLM. Deploy any Agent as
-          an OpenAI-compatible model — locally, on your cluster, or hosted.
-        </p>
-        <div class="mt-8 flex flex-wrap gap-3">
-          <a
-            href="https://github.com/soyaos/soyaos/releases"
-            class="soya-btn-primary"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Get the binary
-            <span aria-hidden="true">→</span>
-          </a>
-          <a
-            href="https://github.com/soyaos/specs"
-            class="soya-btn-ghost"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Read the spec
-          </a>
-        </div>
-        <p class="mt-6 text-[13px] text-soya-mute/80">
-          MIT-licensed · no telemetry · runs on macOS / Linux / Windows
-        </p>
-      </div>
-
-      <div class="self-center">
-        <div class="soya-panel bg-soya-tofu/70 backdrop-blur-sm">
-          <div class="mb-3 flex items-center justify-between">
-            <span class="soya-eyebrow">60-second quickstart</span>
-            <span class="font-mono text-[11px] text-soya-mute/70">~/projects</span>
-          </div>
-          <pre class="soya-code"><code><span class="prompt">$</span>curl -L https://soyaos.ai/install | sh
-<span class="prompt">$</span>soyaos start
-<span class="comment"># paste 127.0.0.1:7474/v1 into Cherry Studio.</span>
-<span class="comment"># done.</span></code></pre>
-          <p class="mt-4 text-[13px] leading-relaxed text-soya-mute">
-            One process. Speaks OpenAI on
-            <code class="rounded bg-soya-panel px-1.5 py-0.5 font-mono text-[12px] text-soya-ink"
-              >/v1/chat/completions</code
-            >. Loads a SoyaPack, schedules a Comet, talks to your model of choice.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  {/* ───────── Flagship Agents ───────── */}
-  <section class="mx-auto max-w-6xl px-6 py-20">
-    <div class="flex items-end justify-between gap-6 flex-wrap">
-      <div>
-        <p class="soya-eyebrow">Four flagship stories</p>
-        <h2 class="mt-2 text-[32px] font-semibold tracking-tight text-soya-ink md:text-[40px]">
-          What people are building.
-        </h2>
-        <p class="mt-3 max-w-2xl text-soya-mute">
-          The alpha ships with four reference Agents — each a complete
-          SoyaPack you can run, fork, or read for inspiration.
-        </p>
-      </div>
-      <a
-        href="https://github.com/soyaos"
-        class="soya-link text-[14px]"
-        rel="noopener noreferrer"
-        target="_blank">All reference repos →</a
-      >
-    </div>
-
-    <div class="mt-10 grid gap-5 sm:grid-cols-2">
-      {
-        stories.map((s) => (
-          <article class="soya-card flex flex-col">
-            <div class="flex items-center gap-3">
-              <span
-                class="flex h-12 w-12 items-center justify-center rounded-control bg-soya-skin text-2xl"
-                aria-hidden="true"
-              >
-                {s.emoji}
-              </span>
-              <div>
-                <p class="font-mono text-[11px] uppercase tracking-[0.14em] text-soya-accentDeep">
-                  {s.id}
-                </p>
-                <h3 class="text-[20px] font-semibold tracking-tight text-soya-ink">
-                  {s.name}
-                </h3>
-              </div>
-            </div>
-            <p class="mt-4 text-[14px] font-medium text-soya-ink/85">
-              {s.persona}
-            </p>
-            <p class="mt-2 flex-1 text-[14px] leading-relaxed text-soya-mute">
-              {s.aha}
-            </p>
-            <a
-              href={s.repo}
-              class="mt-5 inline-flex items-center gap-1.5 text-[13px] font-semibold text-soya-ink hover:text-soya-accent"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              Reference repo
-              <span aria-hidden="true">→</span>
-            </a>
-          </article>
-        ))
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>SoyaOS</title>
+    <style>
+      :root {
+        color-scheme: light;
       }
-    </div>
-  </section>
-
-  {/* ───────── Why SoyaOS ───────── */}
-  <section class="border-t border-soya-border bg-soya-panel/60">
-    <div class="mx-auto max-w-6xl px-6 py-20">
-      <p class="soya-eyebrow">Why SoyaOS</p>
-      <h2 class="mt-2 max-w-3xl text-[32px] font-semibold tracking-tight text-soya-ink md:text-[40px]">
-        Built like a kitchen, not a laboratory.
-      </h2>
-      <p class="mt-3 max-w-2xl text-soya-mute">
-        Three properties we refuse to compromise on, even as the alpha ships
-        weekly.
-      </p>
-
-      <div class="mt-10 grid gap-5 md:grid-cols-3">
-        {
-          whys.map((w, i) => (
-            <div class="soya-card h-full bg-soya-tofu">
-              <span class="soya-eyebrow text-soya-accentDeep">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <h3 class="mt-3 text-[19px] font-semibold tracking-tight text-soya-ink">
-                {w.title}
-              </h3>
-              <p class="mt-3 text-[14px] leading-relaxed text-soya-mute">
-                {w.body}
-              </p>
-            </div>
-          ))
-        }
-      </div>
-    </div>
-  </section>
-
-  {/* ───────── Closing CTA ───────── */}
-  <section class="mx-auto max-w-6xl px-6 py-20">
-    <div
-      class="soya-panel flex flex-col items-start justify-between gap-6 bg-soya-ink text-soya-bg md:flex-row md:items-center"
+      html,
+      body {
+        margin: 0;
+        background: #fbfaf5;
+        color: #2b2419;
+        font-family:
+          "Plus Jakarta Sans",
+          "Inter",
+          "Noto Sans SC",
+          system-ui,
+          -apple-system,
+          sans-serif;
+      }
+      main {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 32px;
+        text-align: center;
+        color: #6b6051;
+      }
+      .logo {
+        font-size: 36px;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        gap: 16px;
+        font-size: 14px;
+      }
+      a {
+        color: #2b2419;
+        text-decoration: none;
+        border-bottom: 2px solid #e0a52c;
+      }
+    </style>
+    <script
+      is:inline
+      define:vars={{ locales, defaultLocale, unmatchedLocale }}
     >
-      <div>
-        <p class="soya-eyebrow text-soya-accent">Ready when you are</p>
-        <h2 class="mt-2 text-[26px] font-semibold tracking-tight md:text-[30px]">
-          Three node roles. One binary. Your hardware.
-        </h2>
-        <p class="mt-2 max-w-2xl text-[14px] leading-relaxed text-soya-bg/70">
-          Planet (control) · Moon (UI / edge) · Comet (worker). Start with
-          all three on your laptop, peel them apart as you grow.
-        </p>
-      </div>
-      <div class="flex flex-wrap gap-3">
-        <a
-          href="https://github.com/soyaos/soyaos/releases"
-          class="soya-btn-primary !bg-soya-accent !text-soya-ink hover:!bg-[#f4b73e]"
-          rel="noopener noreferrer"
-          target="_blank">Download v0.1</a
-        >
-        <a
-          href="/editions"
-          class="soya-btn-ghost !bg-transparent !text-soya-bg hover:!border-soya-accent"
-        >
-          See editions
-        </a>
-      </div>
-    </div>
-  </section>
-</Marketing>
+      // Client-side mirror of the §3 Accept-Language negotiation.
+      const HANT_REGIONS = new Set(["TW", "HK", "MO"]);
+      const mapToLocale = (tag) => {
+        const lower = tag.toLowerCase().trim();
+        if (!lower || lower === "*") return null;
+        if (lower === "zh-hant" || lower.startsWith("zh-hant-")) return "zh-hant";
+        if (lower === "zh-hans" || lower.startsWith("zh-hans-")) return "zh";
+        const [lang, region] = lower.split("-");
+        if (lang === "zh" && region && HANT_REGIONS.has(region.toUpperCase()))
+          return "zh-hant";
+        if (lang === "zh") return "zh";
+        if (lang === "en") return "en";
+        return null;
+      };
+
+      const tags = (navigator.languages && navigator.languages.length
+        ? navigator.languages
+        : navigator.language
+          ? [navigator.language]
+          : []
+      ).filter(Boolean);
+
+      let pick = null;
+      if (tags.length === 0) {
+        pick = defaultLocale;
+      } else {
+        for (const tag of tags) {
+          const m = mapToLocale(tag);
+          if (m) {
+            pick = m;
+            break;
+          }
+        }
+        if (!pick) pick = unmatchedLocale;
+      }
+
+      if (locales.includes(pick)) {
+        const dest = "/" + pick + "/" + window.location.search + window.location.hash;
+        window.location.replace(dest);
+      }
+    </script>
+  </head>
+  <body>
+    <main>
+      <span class="logo" aria-hidden="true">🫘</span>
+      <p>SoyaOS · choose a language</p>
+      <ul>
+        <li><a href="/zh/">简体中文</a></li>
+        <li><a href="/zh-hant/">繁體中文</a></li>
+        <li><a href="/en/">English</a></li>
+      </ul>
+    </main>
+  </body>
+</html>

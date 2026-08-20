@@ -1,0 +1,158 @@
+---
+import {
+  locales,
+  localeNames,
+  stripLocale,
+  withLocale,
+  type Locale,
+} from "../i18n/config";
+import { getDictionary } from "../i18n/dictionaries";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = getDictionary(locale);
+
+/*
+ * Build switcher targets at render time. We strip the current /<locale>
+ * prefix from the active path and re-prefix per option. Query string and
+ * hash are NOT preserved here (Astro renders static HTML, so the values
+ * aren't known until the browser is on the page); the inline script below
+ * patches them in on click so `/en/pricing?ref=cta#faq` round-trips to
+ * `/zh/pricing?ref=cta#faq` after switching.
+ */
+const currentPath = Astro.url.pathname;
+const pathWithoutLocale = stripLocale(currentPath);
+
+const items = locales.map((l) => ({
+  locale: l,
+  label: localeNames[l],
+  href: withLocale(l, pathWithoutLocale),
+  active: l === locale,
+}));
+---
+
+<div class="soya-locale-switcher relative" data-soya-locale-switcher>
+  <button
+    type="button"
+    class="soya-link inline-flex items-center justify-center p-1 text-[13px]"
+    aria-haspopup="listbox"
+    aria-expanded="false"
+    aria-label={`${dict.common.localeSwitcher.label}: ${localeNames[locale]}`}
+    title={localeNames[locale]}
+    data-soya-locale-button
+  >
+    {/* Globe-only trigger — the active locale stays visible via the
+        check-marked menu item and surfaces on hover via the `title`
+        tooltip, so screen readers / keyboard users keep the context. */}
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="10"></circle>
+      <path d="M2 12h20"></path>
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+    </svg>
+  </button>
+
+  <ul
+    class="soya-locale-menu invisible absolute right-0 top-full z-50 mt-2 w-48 origin-top-right rounded-control border border-soya-border bg-soya-tofu p-1 text-[14px] opacity-0 shadow-soyaLift transition-[opacity,transform] duration-150 ease-out -translate-y-1 data-[open=true]:visible data-[open=true]:translate-y-0 data-[open=true]:opacity-100"
+    role="listbox"
+    data-soya-locale-menu
+    data-open="false"
+  >
+    {
+      items.map((item) => (
+        <li>
+          <a
+            href={item.href}
+            data-soya-locale-option
+            role="option"
+            aria-selected={item.active ? "true" : "false"}
+            class={
+              "flex items-center justify-between rounded-control px-3 py-2 transition-colors " +
+              (item.active
+                ? "bg-soya-skin text-soya-accentDeep"
+                : "text-soya-ink hover:bg-soya-panel")
+            }
+          >
+            <span>{item.label}</span>
+            {item.active ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M20 6 9 17l-5-5"></path>
+              </svg>
+            ) : null}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<script>
+  // Toggle dropdown + preserve query / hash when navigating between locales.
+  const root = document.currentScript?.previousElementSibling as HTMLElement | null;
+  // Fallback for live navigation: query the DOM if the immediate sibling
+  // isn't the switcher root (e.g. Astro re-renders this component without
+  // its trailing <script>).
+  const switchers = (root && root.matches("[data-soya-locale-switcher]")
+    ? [root]
+    : Array.from(document.querySelectorAll<HTMLElement>("[data-soya-locale-switcher]")));
+
+  for (const node of switchers) {
+    const button = node.querySelector<HTMLButtonElement>("[data-soya-locale-button]");
+    const menu = node.querySelector<HTMLUListElement>("[data-soya-locale-menu]");
+    if (!button || !menu) continue;
+
+    const setOpen = (open: boolean) => {
+      menu.dataset.open = open ? "true" : "false";
+      button.setAttribute("aria-expanded", open ? "true" : "false");
+    };
+
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      setOpen(menu.dataset.open !== "true");
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!node.contains(event.target as Node)) setOpen(false);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") setOpen(false);
+    });
+
+    for (const option of node.querySelectorAll<HTMLAnchorElement>(
+      "[data-soya-locale-option]",
+    )) {
+      option.addEventListener("click", (event) => {
+        event.preventDefault();
+        const next = new URL(option.href, window.location.href);
+        next.search = window.location.search;
+        next.hash = window.location.hash;
+        window.location.assign(next.toString());
+      });
+    }
+  }
+</script>

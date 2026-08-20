@@ -1,0 +1,134 @@
+---
+import Marketing from "../../layouts/Marketing.astro";
+import { locales, type Locale } from "../../i18n/config";
+import { getDictionary } from "../../i18n/dictionaries";
+
+export function getStaticPaths() {
+  return locales.map((locale) => ({ params: { locale } }));
+}
+
+const { locale } = Astro.params as { locale: Locale };
+const dict = getDictionary(locale);
+---
+
+<Marketing
+  locale={locale}
+  title={dict.meta.pricingTitle}
+  description={dict.meta.pricingDescription}
+  path="/pricing"
+>
+  <section class="soya-hero-wash">
+    <div class="mx-auto max-w-6xl px-6 py-16 md:py-24">
+      <span class="soya-pill">{dict.pricing.hero.pill}</span>
+      <h1
+        class="mt-5 text-[40px] font-bold leading-[1.08] tracking-[-0.02em] text-soya-ink md:text-[56px]"
+      >
+        {dict.pricing.hero.title}
+      </h1>
+      <p class="mt-5 max-w-2xl text-[17px] leading-[1.6] text-soya-mute md:text-[18px]">
+        {dict.pricing.hero.subtitle}
+      </p>
+    </div>
+  </section>
+
+  {/* Big alpha banner */}
+  <section class="mx-auto max-w-6xl px-6">
+    <div
+      class="soya-panel grid gap-6 bg-soya-ink text-soya-bg md:grid-cols-[1.4fr_1fr] md:items-center"
+    >
+      <div>
+        <p class="soya-eyebrow text-soya-accent">{dict.pricing.banner.eyebrow}</p>
+        <h2 class="mt-2 text-[28px] font-semibold tracking-tight md:text-[34px]">
+          {dict.pricing.banner.title}
+        </h2>
+        <p class="mt-3 max-w-xl text-[15px] leading-[1.65] text-soya-bg/75">
+          {dict.pricing.banner.body}
+        </p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a
+            href="https://github.com/soyaos/soyaos/releases"
+            class="soya-btn-primary !bg-soya-accent !text-soya-ink hover:!bg-[#f4b73e]"
+            rel="noopener noreferrer"
+            target="_blank">{dict.pricing.banner.ctaDownload}</a
+          >
+          <a
+            href="https://github.com/soyaos/soyaos"
+            class="soya-btn-ghost !bg-transparent !text-soya-bg hover:!border-soya-accent"
+            rel="noopener noreferrer"
+            target="_blank">{dict.pricing.banner.ctaSource}</a
+          >
+        </div>
+      </div>
+      <ul class="grid gap-3 text-[14px] text-soya-bg/85">
+        {
+          dict.pricing.banner.bullets.map((bullet) => (
+            <li class="flex items-start gap-2">
+              <span class="mt-0.5 text-soya-accent" aria-hidden="true">
+                ●
+              </span>
+              <span>{bullet}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  {/* When we monetize */}
+  <section class="mx-auto max-w-6xl px-6 py-20">
+    <p class="soya-eyebrow">{dict.pricing.future.eyebrow}</p>
+    <h2 class="mt-2 text-[28px] font-semibold tracking-tight text-soya-ink md:text-[34px]">
+      {dict.pricing.future.title}
+    </h2>
+    <p class="mt-3 max-w-2xl text-soya-mute">{dict.pricing.future.intro}</p>
+
+    <div class="mt-10 grid gap-5 md:grid-cols-2">
+      {
+        dict.pricing.future.list.map((f, i) => (
+          <article class="soya-card flex h-full flex-col bg-soya-tofu">
+            <span class="soya-eyebrow">
+              {String(i + 1).padStart(2, "0")} · {dict.pricing.future.futureLabel}
+            </span>
+            <h3 class="mt-3 text-[19px] font-semibold tracking-tight text-soya-ink">
+              {f.title}
+            </h3>
+            <p class="mt-3 text-[14px] leading-relaxed text-soya-mute">{f.body}</p>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  {/* FAQ-ish */}
+  <section class="mx-auto max-w-6xl px-6 pb-24">
+    <div class="soya-panel grid gap-8 bg-soya-panel md:grid-cols-2">
+      {
+        dict.pricing.faq.items.map((item) => (
+          <div>
+            <h3 class="text-[20px] font-semibold tracking-tight text-soya-ink">
+              {item.question}
+            </h3>
+            <p class="mt-2 text-[14px] leading-relaxed text-soya-mute">
+              {item.linkLabel ? (
+                <>
+                  {item.answerBeforeLink}
+                  <a
+                    href="https://github.com/soyaos/soyaos/blob/main/CHANGELOG.md"
+                    class="text-soya-ink underline decoration-soya-accent decoration-2 underline-offset-2 hover:text-soya-accent"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    {item.linkLabel}
+                  </a>
+                  {item.answerAfterLink}
+                </>
+              ) : (
+                item.answer
+              )}
+            </p>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+</Marketing>

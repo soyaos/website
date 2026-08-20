@@ -1,0 +1,45 @@
+---
+import Doc from "../../../layouts/Doc.astro";
+import { getCollection, render } from "astro:content";
+import { isLocale, type Locale } from "../../../i18n/config";
+import { getDictionary } from "../../../i18n/dictionaries";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("docs");
+  return entries.map((entry) => {
+    // Entry id looks like "<locale>/<slug>" — split on the FIRST slash so
+    // multi-segment slugs (if we ever introduce nested docs) still work.
+    const slash = entry.id.indexOf("/");
+    const locale = entry.id.slice(0, slash);
+    const slug = entry.id.slice(slash + 1);
+    return { params: { locale, slug }, props: { entry } };
+  });
+}
+
+const { locale } = Astro.params as { locale: string };
+if (!isLocale(locale)) {
+  throw new Error(`Unknown locale in route params: ${locale}`);
+}
+const typedLocale: Locale = locale;
+const dict = getDictionary(typedLocale);
+
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+
+const slug = entry.id.slice(entry.id.indexOf("/") + 1);
+
+const editHref = `https://github.com/soyaos/website/edit/main/src/content/docs/${entry.id}.md`;
+---
+
+<Doc
+  locale={typedLocale}
+  title={entry.data.title}
+  description={entry.data.description}
+  path={`/docs/${slug}`}
+  slug={slug}
+  headings={headings}
+  editHref={editHref}
+  editLabel={dict.docs.editOnGitHub}
+>
+  <Content />
+</Doc>

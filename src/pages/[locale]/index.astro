@@ -1,0 +1,203 @@
+---
+import Marketing from "../../layouts/Marketing.astro";
+import LocaleLink from "../../components/LocaleLink.astro";
+import { locales, type Locale } from "../../i18n/config";
+import { getDictionary } from "../../i18n/dictionaries";
+
+export function getStaticPaths() {
+  return locales.map((locale) => ({ params: { locale } }));
+}
+
+const { locale } = Astro.params as { locale: Locale };
+const dict = getDictionary(locale);
+
+// Brand/identity bits that don't translate — paired with dict.home.stories.list
+// by index so translations stay shape-aligned with this static metadata.
+const storyMeta = [
+  { id: "DD-008", emoji: "📝", name: "Compo", repo: "https://github.com/soyaos/example-essay-tutor" },
+  { id: "DD-009", emoji: "📡", name: "NewsBeam", repo: "https://github.com/soyaos/example-newsbeam" },
+  { id: "DD-010", emoji: "🏘️", name: "EstateMuse", repo: "https://github.com/soyaos/example-estatemuse" },
+  { id: "DD-011", emoji: "🎬", name: "SilentCut", repo: "https://github.com/soyaos/example-silentcut" },
+];
+
+const stories = storyMeta.map((meta, i) => ({ ...meta, ...dict.home.stories.list[i] }));
+const whys = dict.home.why.list;
+---
+
+<Marketing
+  locale={locale}
+  title={dict.meta.homeTitle}
+  description={dict.meta.homeDescription}
+  path="/"
+>
+  {/* ───────── Hero ───────── */}
+  <section class="soya-hero-wash">
+    <div class="mx-auto grid max-w-6xl gap-10 px-6 py-20 md:grid-cols-[1.1fr_1fr] md:py-28 md:gap-14">
+      <div>
+        <span class="soya-pill">
+          <span class="inline-block h-1.5 w-1.5 rounded-full bg-soya-edamame"></span>
+          {dict.home.hero.pill}
+        </span>
+        <h1
+          class="mt-5 text-[44px] font-bold leading-[1.06] tracking-[-0.022em] text-soya-ink md:text-[60px]"
+        >
+          {dict.home.hero.titleLine1}
+          <span class="block text-soya-accentDeep">{dict.home.hero.titleLine2}</span>
+        </h1>
+        <p class="mt-5 max-w-xl text-[17px] leading-[1.6] text-soya-mute md:text-[18px]">
+          {dict.home.hero.subtitle}
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a
+            href="https://github.com/soyaos/soyaos/releases"
+            class="soya-btn-primary"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {dict.home.hero.ctaPrimary}
+            <span aria-hidden="true">→</span>
+          </a>
+          <a
+            href="https://github.com/soyaos/specs"
+            class="soya-btn-ghost"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {dict.home.hero.ctaSecondary}
+          </a>
+        </div>
+        <p class="mt-6 text-[13px] text-soya-mute/80">{dict.home.hero.platforms}</p>
+      </div>
+
+      <div class="self-center">
+        <div class="soya-panel bg-soya-tofu/70 backdrop-blur-sm">
+          <div class="mb-3 flex items-center justify-between">
+            <span class="soya-eyebrow">{dict.home.quickstart.label}</span>
+            <span class="font-mono text-[11px] text-soya-mute/70">{dict.home.quickstart.pathLabel}</span>
+          </div>
+          <pre class="soya-code"><code><span class="prompt">$</span>curl -L https://soyaos.ai/install | sh
+<span class="prompt">$</span>soyaos start
+<span class="comment">{dict.home.quickstart.comment1}</span>
+<span class="comment">{dict.home.quickstart.comment2}</span></code></pre>
+          <p class="mt-4 text-[13px] leading-relaxed text-soya-mute">
+            {dict.home.quickstart.caption}
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ───────── Flagship Agents ───────── */}
+  <section class="mx-auto max-w-6xl px-6 py-20">
+    <div class="flex items-end justify-between gap-6 flex-wrap">
+      <div>
+        <p class="soya-eyebrow">{dict.home.stories.eyebrow}</p>
+        <h2 class="mt-2 text-[32px] font-semibold tracking-tight text-soya-ink md:text-[40px]">
+          {dict.home.stories.title}
+        </h2>
+        <p class="mt-3 max-w-2xl text-soya-mute">{dict.home.stories.intro}</p>
+      </div>
+      <a
+        href="https://github.com/soyaos"
+        class="soya-link text-[14px]"
+        rel="noopener noreferrer"
+        target="_blank">{dict.home.stories.allRepos}</a
+      >
+    </div>
+
+    <div class="mt-10 grid gap-5 sm:grid-cols-2">
+      {
+        stories.map((s) => (
+          <article class="soya-card flex flex-col">
+            <div class="flex items-center gap-3">
+              <span
+                class="flex h-12 w-12 items-center justify-center rounded-control bg-soya-skin text-2xl"
+                aria-hidden="true"
+              >
+                {s.emoji}
+              </span>
+              <div>
+                <p class="font-mono text-[11px] uppercase tracking-[0.14em] text-soya-accentDeep">
+                  {s.id}
+                </p>
+                <h3 class="text-[20px] font-semibold tracking-tight text-soya-ink">
+                  {s.name}
+                </h3>
+              </div>
+            </div>
+            <p class="mt-4 text-[14px] font-medium text-soya-ink/85">{s.persona}</p>
+            <p class="mt-2 flex-1 text-[14px] leading-relaxed text-soya-mute">{s.aha}</p>
+            <a
+              href={s.repo}
+              class="mt-5 inline-flex items-center gap-1.5 text-[13px] font-semibold text-soya-ink hover:text-soya-accent"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              {dict.home.stories.referenceRepo}
+              <span aria-hidden="true">→</span>
+            </a>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  {/* ───────── Why SoyaOS ───────── */}
+  <section class="border-t border-soya-border bg-soya-panel/60">
+    <div class="mx-auto max-w-6xl px-6 py-20">
+      <p class="soya-eyebrow">{dict.home.why.eyebrow}</p>
+      <h2 class="mt-2 max-w-3xl text-[32px] font-semibold tracking-tight text-soya-ink md:text-[40px]">
+        {dict.home.why.title}
+      </h2>
+      <p class="mt-3 max-w-2xl text-soya-mute">{dict.home.why.intro}</p>
+
+      <div class="mt-10 grid gap-5 md:grid-cols-3">
+        {
+          whys.map((w, i) => (
+            <div class="soya-card h-full bg-soya-tofu">
+              <span class="soya-eyebrow text-soya-accentDeep">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <h3 class="mt-3 text-[19px] font-semibold tracking-tight text-soya-ink">
+                {w.title}
+              </h3>
+              <p class="mt-3 text-[14px] leading-relaxed text-soya-mute">{w.body}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  {/* ───────── Closing CTA ───────── */}
+  <section class="mx-auto max-w-6xl px-6 py-20">
+    <div
+      class="soya-panel flex flex-col items-start justify-between gap-6 bg-soya-ink text-soya-bg md:flex-row md:items-center"
+    >
+      <div>
+        <p class="soya-eyebrow text-soya-accent">{dict.home.closing.eyebrow}</p>
+        <h2 class="mt-2 text-[26px] font-semibold tracking-tight md:text-[30px]">
+          {dict.home.closing.title}
+        </h2>
+        <p class="mt-2 max-w-2xl text-[14px] leading-relaxed text-soya-bg/70">
+          {dict.home.closing.body}
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <a
+          href="https://github.com/soyaos/soyaos/releases"
+          class="soya-btn-primary !bg-soya-accent !text-soya-ink hover:!bg-[#f4b73e]"
+          rel="noopener noreferrer"
+          target="_blank">{dict.home.closing.ctaDownload}</a
+        >
+        <LocaleLink
+          href="/editions"
+          locale={locale}
+          class="soya-btn-ghost !bg-transparent !text-soya-bg hover:!border-soya-accent"
+        >
+          {dict.home.closing.ctaEditions}
+        </LocaleLink>
+      </div>
+    </div>
+  </section>
+</Marketing>

@@ -1,0 +1,95 @@
+---
+import Marketing from "../../../layouts/Marketing.astro";
+import LocaleLink from "../../../components/LocaleLink.astro";
+import DocsSidebar from "../../../components/DocsSidebar.astro";
+import { getCollection } from "astro:content";
+import { sidebar } from "../../../i18n/docs-sidebar";
+import { locales, type Locale } from "../../../i18n/config";
+import { getDictionary } from "../../../i18n/dictionaries";
+
+export function getStaticPaths() {
+  return locales.map((locale) => ({ params: { locale } }));
+}
+
+const { locale } = Astro.params as { locale: Locale };
+const dict = getDictionary(locale);
+
+const all = await getCollection("docs", (e) => e.id.startsWith(`${locale}/`));
+const dataBySlug = new Map(
+  all.map((e) => {
+    const slug = e.id.slice(`${locale}/`.length);
+    return [slug, e.data] as const;
+  }),
+);
+
+// Build a section list keyed by category for the landing grid. Skips
+// missing slugs gracefully so a partial translation doesn't break the
+// index.
+const sections = sidebar.map((s) => ({
+  category: s.category,
+  entries: s.entries
+    .map((e) => ({ slug: e.slug, data: dataBySlug.get(e.slug) }))
+    .filter((e): e is { slug: string; data: NonNullable<ReturnType<typeof dataBySlug.get>> } => !!e.data),
+}));
+---
+
+<Marketing
+  locale={locale}
+  title={dict.meta.docsTitle}
+  description={dict.docs.indexIntro}
+  path="/docs"
+>
+  <div
+    class="mx-auto grid w-full max-w-7xl gap-x-10 gap-y-6 px-6 py-10 md:grid-cols-[15rem_1fr] md:py-14"
+  >
+    <aside class="hidden md:block">
+      <div class="sticky top-24">
+        <DocsSidebar locale={locale} />
+      </div>
+    </aside>
+
+    <div class="min-w-0">
+      <header class="border-b border-soya-border pb-6">
+        <p class="soya-eyebrow">{dict.common.nav.docs}</p>
+        <h1 class="mt-2 text-[36px] font-bold tracking-[-0.018em] text-soya-ink md:text-[44px]">
+          {dict.docs.indexTitle}
+        </h1>
+        <p class="mt-3 max-w-2xl text-[16px] leading-[1.6] text-soya-mute">
+          {dict.docs.indexIntro}
+        </p>
+        <div class="mt-6">
+          <LocaleLink href="/docs/quickstart" locale={locale} class="soya-btn-primary">
+            {dict.docs.indexCtaQuickstart}
+            <span aria-hidden="true">→</span>
+          </LocaleLink>
+        </div>
+      </header>
+
+      {
+        sections.map((section) => (
+          <section class="mt-10">
+            <h2 class="text-[20px] font-semibold tracking-tight text-soya-ink">
+              {dict.docs.sidebarCategories[section.category]}
+            </h2>
+            <div class="mt-4 grid gap-4 sm:grid-cols-2">
+              {section.entries.map((entry) => (
+                <LocaleLink
+                  href={`/docs/${entry.slug}`}
+                  locale={locale}
+                  class="soya-card flex flex-col gap-2"
+                >
+                  <h3 class="text-[17px] font-semibold tracking-tight text-soya-ink">
+                    {entry.data.title}
+                  </h3>
+                  <p class="text-[13px] leading-relaxed text-soya-mute">
+                    {entry.data.description}
+                  </p>
+                </LocaleLink>
+              ))}
+            </div>
+          </section>
+        ))
+      }
+    </div>
+  </div>
+</Marketing>

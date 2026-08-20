@@ -1,0 +1,72 @@
+---
+import LocaleLink from "./LocaleLink.astro";
+import { getCollection } from "astro:content";
+import { flatOrder } from "../i18n/docs-sidebar";
+import { getDictionary } from "../i18n/dictionaries";
+import type { Locale } from "../i18n/config";
+
+interface Props {
+  locale: Locale;
+  slug: string;
+}
+
+const { locale, slug } = Astro.props;
+const dict = getDictionary(locale);
+
+const all = await getCollection("docs", (e) => e.id.startsWith(`${locale}/`));
+const titleBySlug = new Map<string, string>(
+  all.map((e) => {
+    const s = e.id.slice(`${locale}/`.length);
+    return [s, e.data.title] as const;
+  }),
+);
+
+const idx = flatOrder.indexOf(slug);
+const prevSlug = idx > 0 ? flatOrder[idx - 1] : null;
+const nextSlug = idx >= 0 && idx < flatOrder.length - 1 ? flatOrder[idx + 1] : null;
+
+const prev = prevSlug ? { slug: prevSlug, title: titleBySlug.get(prevSlug) } : null;
+const next = nextSlug ? { slug: nextSlug, title: titleBySlug.get(nextSlug) } : null;
+---
+
+{
+  (prev || next) && (
+    <nav
+      class="not-prose mt-16 grid gap-3 border-t border-soya-border pt-8 sm:grid-cols-2"
+      aria-label="Pagination"
+    >
+      {prev?.title ? (
+        <LocaleLink
+          href={`/docs/${prev.slug}`}
+          locale={locale}
+          class="soya-card group flex flex-col gap-1 !p-4 text-left"
+        >
+          <span class="text-[11px] font-semibold uppercase tracking-[0.12em] text-soya-mute">
+            ← {dict.docs.previous}
+          </span>
+          <span class="text-[15px] font-semibold text-soya-ink group-hover:text-soya-accent">
+            {prev.title}
+          </span>
+        </LocaleLink>
+      ) : (
+        <span />
+      )}
+      {next?.title ? (
+        <LocaleLink
+          href={`/docs/${next.slug}`}
+          locale={locale}
+          class="soya-card group flex flex-col gap-1 !p-4 text-right sm:items-end"
+        >
+          <span class="text-[11px] font-semibold uppercase tracking-[0.12em] text-soya-mute">
+            {dict.docs.next} →
+          </span>
+          <span class="text-[15px] font-semibold text-soya-ink group-hover:text-soya-accent">
+            {next.title}
+          </span>
+        </LocaleLink>
+      ) : (
+        <span />
+      )}
+    </nav>
+  )
+}

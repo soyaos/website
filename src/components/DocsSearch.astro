@@ -1,0 +1,179 @@
+---
+import { getDictionary } from "../i18n/dictionaries";
+import { localeBcp47, type Locale } from "../i18n/config";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = getDictionary(locale);
+const bcp47 = localeBcp47[locale];
+---
+
+<button
+  type="button"
+  class="soya-link inline-flex items-center gap-1.5 text-[13px]"
+  data-soya-search-open
+  aria-label={dict.docs.searchLabel}
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="11" cy="11" r="7"></circle>
+    <path d="m21 21-3.5-3.5"></path>
+  </svg>
+  <span>{dict.docs.searchLabel}</span>
+  <kbd
+    class="ml-1 hidden rounded border border-soya-borderStrong bg-soya-panel px-1.5 py-0.5 font-mono text-[10px] text-soya-mute sm:inline-block"
+    >⌘K</kbd
+  >
+</button>
+
+<dialog
+  data-soya-search-dialog
+  class="soya-search-dialog max-w-2xl w-[92vw] rounded-card border border-soya-border bg-soya-bg p-0 backdrop:bg-soya-ink/40 backdrop:backdrop-blur-sm"
+  aria-label={dict.docs.searchLabel}
+>
+  <div class="p-5">
+    <div id="soya-search-mount" data-pagefind-language={bcp47}></div>
+    <p
+      data-soya-search-fallback
+      class="hidden p-6 text-center text-[14px] text-soya-mute"
+    >
+      {dict.docs.searchEmpty}
+    </p>
+  </div>
+</dialog>
+
+<style is:global>
+  /* Pagefind default UI tinted to match the Stone-Ground palette. Only
+     override the highest-impact tokens — let the component handle the rest. */
+  :root {
+    --pagefind-ui-scale: 0.9;
+    --pagefind-ui-primary: #2b2419;
+    --pagefind-ui-text: #2b2419;
+    --pagefind-ui-background: #fbfaf5;
+    --pagefind-ui-border: rgba(43, 36, 25, 0.14);
+    --pagefind-ui-tag: #f8f5ec;
+    --pagefind-ui-border-width: 1px;
+    --pagefind-ui-border-radius: 14px;
+    --pagefind-ui-image-border-radius: 8px;
+    --pagefind-ui-image-box-ratio: 3 / 2;
+    --pagefind-ui-font: inherit;
+  }
+</style>
+
+<script>
+  /*
+   * Lazy-load Pagefind's default UI on first open. The /pagefind/ assets are
+   * produced by the postbuild step (see package.json `build` script), so in
+   * `astro dev` they won't exist — we just show a friendly fallback line.
+   */
+  type Loaded = "pending" | "ok" | "missing";
+  let loaded: Loaded = "pending";
+
+  function loadOnce() {
+    if (loaded !== "pending") return Promise.resolve(loaded);
+    return new Promise<Loaded>((resolve) => {
+      const cssHref = "/pagefind/pagefind-ui.css";
+      const jsSrc = "/pagefind/pagefind-ui.js";
+
+      const fail = () => {
+        loaded = "missing";
+        resolve("missing");
+      };
+
+      // Probe CSS first; if the index isn't built we want to know fast.
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = cssHref;
+      link.onerror = fail;
+      document.head.appendChild(link);
+
+      const script = document.createElement("script");
+      script.src = jsSrc;
+      script.onload = () => {
+        loaded = "ok";
+        resolve("ok");
+      };
+      script.onerror = fail;
+      document.head.appendChild(script);
+    });
+  }
+
+  const openers = document.querySelectorAll<HTMLButtonElement>(
+    "[data-soya-search-open]",
+  );
+  for (const opener of openers) {
+    opener.addEventListener("click", async () => {
+      const dialog = document.querySelector<HTMLDialogElement>(
+        "[data-soya-search-dialog]",
+      );
+      if (!dialog) return;
+      dialog.showModal();
+
+      const status = await loadOnce();
+      const mount = dialog.querySelector<HTMLElement>("#soya-search-mount");
+      const fallback = dialog.querySelector<HTMLElement>(
+        "[data-soya-search-fallback]",
+      );
+      if (!mount || !fallback) return;
+
+      if (status === "ok") {
+        fallback.classList.add("hidden");
+        // Only instantiate the UI once.
+        if (!mount.dataset.inited) {
+          mount.dataset.inited = "1";
+          // PagefindUI is exposed as a global by /pagefind/pagefind-ui.js.
+          const PagefindUI = (window as unknown as {
+            PagefindUI?: new (opts: Record<string, unknown>) => void;
+          }).PagefindUI;
+          if (PagefindUI) {
+            new PagefindUI({
+              element: mount,
+              showSubResults: true,
+              showImages: false,
+              autofocus: true,
+            });
+          } else {
+            fallback.classList.remove("hidden");
+          }
+        }
+      } else {
+        mount.innerHTML = "";
+        fallback.classList.remove("hidden");
+      }
+    });
+  }
+
+  // Keyboard: ⌘K / Ctrl+K to open, Esc to close (Esc is native on <dialog>).
+  document.addEventListener("keydown", (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+      event.preventDefault();
+      const first = document.querySelector<HTMLButtonElement>(
+        "[data-soya-search-open]",
+      );
+      first?.click();
+    }
+  });
+
+  // Click on the backdrop closes the dialog (dialog::backdrop default is
+  // backdrop-only; clicks INSIDE the dialog should not close it).
+  for (const dialog of document.querySelectorAll<HTMLDialogElement>(
+    "[data-soya-search-dialog]",
+  )) {
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+  }
+</script>

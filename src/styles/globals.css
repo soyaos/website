@@ -34,6 +34,14 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/*
+ * Component classes live inside @layer components so Tailwind utilities
+ * (e.g. bg-soya-ink on a .soya-panel) reliably override them. Without this
+ * wrapping, these rules are emitted AFTER @tailwind utilities and — at equal
+ * specificity — win the cascade, which silently hides any utility-level
+ * background override (low-contrast text on the wrong panel color).
+ */
+@layer components {
 /* Atmospheric golden-cream wash behind the hero — the "warm sunlit kitchen". */
 .soya-hero-wash {
   background:
@@ -200,6 +208,157 @@ body {
   text-transform: uppercase;
   color: var(--accent-deep);
 }
+
+/*
+ * Docs prose — Stone-Ground typography for rendered markdown bodies.
+ * Scoped to .docs-article so it doesn't bleed into marketing copy or the
+ * Pagefind UI's own rules.
+ */
+.docs-article {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text);
+}
+.docs-article > * + * {
+  margin-top: 1.1em;
+}
+.docs-article h2 {
+  margin-top: 2.4em;
+  margin-bottom: 0.6em;
+  padding-bottom: 0.4em;
+  border-bottom: 1px solid var(--border);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  scroll-margin-top: 6rem;
+}
+.docs-article h3 {
+  margin-top: 1.8em;
+  margin-bottom: 0.5em;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  scroll-margin-top: 6rem;
+}
+.docs-article h4 {
+  margin-top: 1.5em;
+  margin-bottom: 0.4em;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  scroll-margin-top: 6rem;
+}
+.docs-article p {
+  color: var(--text);
+}
+.docs-article a {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  transition: color 120ms ease;
+}
+.docs-article a:hover {
+  color: var(--accent);
+}
+.docs-article strong {
+  color: var(--text);
+  font-weight: 600;
+}
+.docs-article em {
+  font-style: italic;
+}
+.docs-article ul,
+.docs-article ol {
+  padding-left: 1.5em;
+}
+.docs-article ul {
+  list-style: disc;
+}
+.docs-article ol {
+  list-style: decimal;
+}
+.docs-article li {
+  margin-top: 0.4em;
+}
+.docs-article li > p {
+  margin-top: 0.3em;
+}
+.docs-article blockquote {
+  margin-left: 0;
+  padding: 0.6em 1em;
+  border-left: 3px solid var(--accent);
+  background: var(--panel);
+  border-radius: 0 12px 12px 0;
+  color: var(--text-mute);
+  font-style: italic;
+}
+.docs-article blockquote p {
+  color: inherit;
+}
+.docs-article :not(pre) > code {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.1em 0.4em;
+  font-family:
+    "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    monospace;
+  font-size: 0.88em;
+  color: var(--text);
+}
+.docs-article pre {
+  background: var(--text);
+  color: var(--bg);
+  border-radius: 14px;
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.65;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.docs-article pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+.docs-article table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  display: block;
+  overflow-x: auto;
+}
+.docs-article thead {
+  background: var(--panel);
+}
+.docs-article th,
+.docs-article td {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+.docs-article th {
+  font-weight: 600;
+  color: var(--text);
+}
+.docs-article hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 2em 0;
+}
+.docs-article .not-prose {
+  /* Escape hatch — applied to <nav> blocks (e.g. prev/next) that should
+     not inherit prose typography rules. */
+  font-size: 14px;
+  line-height: 1.5;
+}
+} /* end @layer components */
 
 /* Focus ring — Soybean Gold per spec. */
 :focus-visible {

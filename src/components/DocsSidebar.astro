@@ -1,0 +1,63 @@
+---
+import LocaleLink from "./LocaleLink.astro";
+import { getCollection } from "astro:content";
+import { sidebar } from "../i18n/docs-sidebar";
+import { getDictionary } from "../i18n/dictionaries";
+import type { Locale } from "../i18n/config";
+
+interface Props {
+  locale: Locale;
+  activeSlug?: string;
+}
+
+const { locale, activeSlug } = Astro.props;
+const dict = getDictionary(locale);
+
+// Resolve each sidebar entry against the actual content collection so we can
+// surface the entry's own (potentially translated) `title` field. Skips
+// slugs that don't have a markdown file in this locale — keeps the sidebar
+// honest if a translation hasn't shipped yet.
+const all = await getCollection("docs", (e) => e.id.startsWith(`${locale}/`));
+const titleBySlug = new Map<string, string>(
+  all.map((e) => {
+    const slug = e.id.slice(`${locale}/`.length);
+    return [slug, e.data.title] as const;
+  }),
+);
+---
+
+<nav class="docs-sidebar text-[14px]" aria-label="Docs navigation">
+  {
+    sidebar.map((section) => (
+      <section class="mb-7">
+        <h2 class="soya-eyebrow mb-3">
+          {dict.docs.sidebarCategories[section.category]}
+        </h2>
+        <ul class="space-y-1">
+          {section.entries.map((entry) => {
+            const title = titleBySlug.get(entry.slug);
+            if (!title) return null;
+            const active = entry.slug === activeSlug;
+            return (
+              <li>
+                <LocaleLink
+                  href={`/docs/${entry.slug}`}
+                  locale={locale}
+                  class={
+                    "block rounded-md px-2 py-1 transition-colors " +
+                    (active
+                      ? "bg-soya-skin font-semibold text-soya-accentDeep"
+                      : "text-soya-mute hover:bg-soya-panel hover:text-soya-ink")
+                  }
+                  aria-current={active ? "page" : undefined}
+                >
+                  {title}
+                </LocaleLink>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    ))
+  }
+</nav>

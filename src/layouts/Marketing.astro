@@ -1,32 +1,73 @@
 ---
 import "../styles/globals.css";
+import {
+  locales,
+  localeBcp47,
+  localeOg,
+  defaultLocale,
+  stripLocale,
+  type Locale,
+} from "../i18n/config";
+import { getDictionary } from "../i18n/dictionaries";
+import LocaleLink from "../components/LocaleLink.astro";
+import LocaleSwitcher from "../components/LocaleSwitcher.astro";
+import DocsSearch from "../components/DocsSearch.astro";
+import ExternalIcon from "../components/ExternalIcon.astro";
 
 interface Props {
+  locale: Locale;
   title?: string;
   description?: string;
+  /**
+   * Locale-less path used to build canonical + hreflang alternates. Defaults
+   * to the current URL's pathname with the active locale prefix stripped.
+   */
   path?: string;
 }
 
-const {
-  title = "SoyaOS — Agent Operating System",
-  description = "One binary, six editions, three node roles. SoyaOS gets out of your way: bring your own LLM, deploy any Agent as an OpenAI-compatible model.",
-  path,
-} = Astro.props;
+const { locale, title: titleOverride, description: descriptionOverride, path } =
+  Astro.props;
 
-// Canonical URL — fall back to Astro's resolved pathname.
-const canonicalPath =
-  path ?? (Astro.url.pathname === "/" ? "/" : Astro.url.pathname.replace(/\/$/, ""));
-const canonical = `https://soyaos.ai${canonicalPath === "/" ? "" : canonicalPath}`;
+const dict = getDictionary(locale);
 
-const nav = [
-  { label: "Editions", href: "/editions" },
-  { label: "Pricing", href: "/pricing" },
-  { label: "Docs", href: "/docs" },
-];
+const title = titleOverride ?? dict.meta.siteTitle;
+const description = descriptionOverride ?? dict.meta.homeDescription;
+
+const localeAgnosticPath = path ?? stripLocale(Astro.url.pathname);
+const cleanPath = localeAgnosticPath === "/"
+  ? ""
+  : localeAgnosticPath.replace(/\/$/, "");
+
+const baseOrigin = "https://soyaos.ai";
+
+const canonical = `${baseOrigin}/${locale}${cleanPath}`;
+
+// hreflang map per Google Search Central — keys use BCP-47 standard casing.
+const languageAlternates: Record<string, string> = {};
+for (const l of locales) {
+  languageAlternates[localeBcp47[l]] = `${baseOrigin}/${l}${cleanPath}`;
+}
+// x-default points at the home-market locale (matches Accept-Language §3.3
+// "missing header" branch). Search engines pick this when they have no
+// language preference signal.
+languageAlternates["x-default"] = `${baseOrigin}/${defaultLocale}${cleanPath}`;
+
+const ogLocale = localeOg[locale];
+const ogAlternateLocales = locales
+  .filter((l) => l !== locale)
+  .map((l) => localeOg[l]);
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "SoyaOS",
+  url: baseOrigin,
+  inLanguage: locales.map((l) => localeBcp47[l]),
+};
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={localeBcp47[locale]}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -34,8 +75,14 @@ const nav = [
     <meta name="theme-color" content="#FBFAF5" />
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="alternate icon" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+
+    {
+      Object.entries(languageAlternates).map(([hreflang, href]) => (
+        <link rel="alternate" hreflang={hreflang} href={href} />
+      ))
+    }
 
     {/* Open Graph */}
     <meta property="og:type" content="website" />
@@ -44,7 +91,12 @@ const nav = [
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content="https://soyaos.ai/og.png" />
-    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale" content={ogLocale} />
+    {
+      ogAlternateLocales.map((alt) => (
+        <meta property="og:locale:alternate" content={alt} />
+      ))
+    }
 
     {/* Twitter */}
     <meta name="twitter:card" content="summary_large_image" />
@@ -52,41 +104,57 @@ const nav = [
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content="https://soyaos.ai/og.png" />
 
-    {/* Webfonts — Plus Jakarta Sans + IBM Plex Mono + Noto Sans SC fallback. */}
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    {/* Webfonts — Plus Jakarta Sans + IBM Plex Mono + Noto Sans SC fallback.
+        Served from the official Google Fonts China mirror (googlefonts.cn) so
+        users in mainland China don't hit the previous loli mirror, which is
+        no longer reachable. */}
+    <link rel="preconnect" href="https://fonts.font.im" />
+    <link rel="preconnect" href="https://fonts.gstatic.font.im" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&display=swap"
+      href="https://fonts.font.im/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&display=swap"
     />
+
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
     <title>{title}</title>
   </head>
   <body class="min-h-screen flex flex-col font-sans antialiased">
     <header class="soya-nav sticky top-0 z-40 border-b border-soya-border">
       <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <a href="/" class="flex items-center gap-2 font-semibold tracking-tight">
+        <LocaleLink
+          href="/"
+          locale={locale}
+          class="flex items-center gap-2 font-semibold tracking-tight"
+        >
           <span class="text-xl leading-none" aria-hidden="true">🫘</span>
           <span class="text-[15px]">SoyaOS</span>
           <span
             class="ml-2 hidden rounded-full bg-soya-skin px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-soya-accentDeep sm:inline-block"
-            >alpha</span
+            >{dict.common.nav.alpha}</span
           >
-        </a>
-        <nav class="flex items-center gap-7 text-[14px]">
-          {
-            nav.map((item) => (
-              <a href={item.href} class="soya-link">
-                {item.label}
-              </a>
-            ))
-          }
+        </LocaleLink>
+        <nav class="flex items-center gap-5 text-[14px] md:gap-7">
+          <LocaleLink href="/editions" locale={locale} class="soya-link">
+            {dict.common.nav.editions}
+          </LocaleLink>
+          <LocaleLink href="/pricing" locale={locale} class="soya-link">
+            {dict.common.nav.pricing}
+          </LocaleLink>
+          <LocaleLink href="/docs" locale={locale} class="soya-link">
+            {dict.common.nav.docs}
+          </LocaleLink>
           <a
             href="https://github.com/soyaos/soyaos"
-            class="soya-link"
+            class="soya-link hidden items-center gap-1 sm:inline-flex"
             rel="noopener noreferrer"
-            target="_blank">GitHub</a
+            target="_blank"
           >
+            {dict.common.nav.github}
+            <ExternalIcon />
+          </a>
+          <DocsSearch locale={locale} />
+          <LocaleSwitcher locale={locale} />
         </nav>
       </div>
     </header>
@@ -102,33 +170,40 @@ const nav = [
         <div class="flex items-center gap-2">
           <span class="text-lg" aria-hidden="true">🫘</span>
           <span class="font-semibold text-soya-ink">SoyaOS</span>
-          <span class="opacity-60">· Agent OS · MIT-licensed</span>
+          <span class="opacity-60">· {dict.common.footer.tagline}</span>
         </div>
         <nav class="flex flex-wrap items-center gap-x-5 gap-y-2">
-          <a href="/editions" class="hover:text-soya-accent">Editions</a>
-          <a href="/pricing" class="hover:text-soya-accent">Pricing</a>
-          <a
-            href="https://docs.soyaos.ai"
-            class="hover:text-soya-accent"
-            rel="noopener noreferrer"
-            target="_blank">Docs</a
-          >
+          <LocaleLink href="/editions" locale={locale} class="hover:text-soya-accent">
+            {dict.common.footer.editions}
+          </LocaleLink>
+          <LocaleLink href="/pricing" locale={locale} class="hover:text-soya-accent">
+            {dict.common.footer.pricing}
+          </LocaleLink>
+          <LocaleLink href="/docs" locale={locale} class="hover:text-soya-accent">
+            {dict.common.footer.docs}
+          </LocaleLink>
           <a
             href="https://github.com/soyaos/soyaos"
-            class="hover:text-soya-accent"
+            class="inline-flex items-center gap-1 hover:text-soya-accent"
             rel="noopener noreferrer"
-            target="_blank">GitHub</a
+            target="_blank"
           >
+            {dict.common.footer.github}
+            <ExternalIcon />
+          </a>
           <a
             href="https://github.com/soyaos/soyaos/blob/main/LICENSE"
-            class="hover:text-soya-accent"
+            class="inline-flex items-center gap-1 hover:text-soya-accent"
             rel="noopener noreferrer"
-            target="_blank">LICENSE</a
+            target="_blank"
           >
+            {dict.common.footer.license}
+            <ExternalIcon />
+          </a>
           <span class="opacity-40" aria-hidden="true">·</span>
-          <span class="opacity-70">Discord (soon)</span>
+          <span class="opacity-70">{dict.common.footer.discordSoon}</span>
         </nav>
-        <div class="text-[12px] opacity-60">© 2026 SoyaOS Contributors</div>
+        <div class="text-[12px] opacity-60">{dict.common.footer.copyright}</div>
       </div>
     </footer>
   </body>
