@@ -28,6 +28,7 @@ const DISCOVERY_CONTENT_TYPES = new Map([
   ["/sitemap.xml", "application/xml; charset=utf-8"],
   ["/llms.txt", "text/markdown; charset=utf-8"],
 ]);
+const LOCALIZABLE_PATH = /^\/(?:editions|pricing|docs(?:\/.*)?)\/?$/;
 
 function mapToLocale(tag) {
   const lower = tag.toLowerCase().trim();
@@ -83,6 +84,16 @@ export default {
     if (url.pathname === "/") {
       const locale = pickLocale(request.headers.get("accept-language"));
       const dest = new URL(`/${locale}/`, url);
+      dest.search = url.search;
+      return Response.redirect(dest.toString(), 302);
+    }
+
+    // Locale-less editorial/document paths use the same negotiation as `/`
+    // and preserve the requested path + query. URL locale remains the only
+    // authority after the 302.
+    if (LOCALIZABLE_PATH.test(url.pathname)) {
+      const locale = pickLocale(request.headers.get("accept-language"));
+      const dest = new URL(`/${locale}${url.pathname}`, url);
       dest.search = url.search;
       return Response.redirect(dest.toString(), 302);
     }

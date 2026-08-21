@@ -93,4 +93,18 @@ const singularLlmsResponse = await worker.fetch(
 );
 assert(singularLlmsResponse.status === 404, "the obsolete singular /llm.txt path must be absent");
 
+for (const testCase of [
+  { header: "zh-HK", location: "https://soyaos.ai/zh-hant/docs/quickstart?from=e2e" },
+  { header: "ja", location: "https://soyaos.ai/en/docs/quickstart?from=e2e" },
+]) {
+  const negotiated = await worker.fetch(
+    new Request("https://soyaos.ai/docs/quickstart?from=e2e", {
+      headers: { "accept-language": testCase.header },
+    }),
+    { ASSETS: { fetch: async () => new Response("must not run") } },
+  );
+  assert(negotiated.status === 302, `locale-less docs status for ${testCase.header}`);
+  assert(negotiated.headers.get("location") === testCase.location, `locale-less docs location for ${testCase.header}`);
+}
+
 console.log("public discovery contract: 48 HTML/Markdown pairs verified");
