@@ -3,6 +3,7 @@ import Marketing from "../../layouts/Marketing.astro";
 import LocaleLink from "../../components/LocaleLink.astro";
 import { locales, type Locale } from "../../i18n/config";
 import { getDictionary } from "../../i18n/dictionaries";
+import { storyMeta } from "../../lib/public-content";
 
 export function getStaticPaths() {
   return locales.map((locale) => ({ params: { locale } }));
@@ -10,15 +11,6 @@ export function getStaticPaths() {
 
 const { locale } = Astro.params as { locale: Locale };
 const dict = getDictionary(locale);
-
-// Brand/identity bits that don't translate — paired with dict.home.stories.list
-// by index so translations stay shape-aligned with this static metadata.
-const storyMeta = [
-  { id: "DD-008", emoji: "📝", name: "Compo", repo: "https://github.com/soyaos/example-essay-tutor" },
-  { id: "DD-009", emoji: "📡", name: "NewsBeam", repo: "https://github.com/soyaos/example-newsbeam" },
-  { id: "DD-010", emoji: "🏘️", name: "EstateMuse", repo: "https://github.com/soyaos/example-estatemuse" },
-  { id: "DD-011", emoji: "🎬", name: "SilentCut", repo: "https://github.com/soyaos/example-silentcut" },
-];
 
 const stories = storyMeta.map((meta, i) => ({ ...meta, ...dict.home.stories.list[i] }));
 const whys = dict.home.why.list;
@@ -29,6 +21,7 @@ const whys = dict.home.why.list;
   title={dict.meta.homeTitle}
   description={dict.meta.homeDescription}
   path="/"
+  schemaType="WebSite"
 >
   {/* ───────── Hero ───────── */}
   <section class="soya-hero-wash">

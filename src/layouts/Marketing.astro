@@ -23,9 +23,16 @@ interface Props {
    * to the current URL's pathname with the active locale prefix stripped.
    */
   path?: string;
+  schemaType?: "WebSite" | "WebPage" | "CollectionPage" | "TechArticle";
 }
 
-const { locale, title: titleOverride, description: descriptionOverride, path } =
+const {
+  locale,
+  title: titleOverride,
+  description: descriptionOverride,
+  path,
+  schemaType = "WebPage",
+} =
   Astro.props;
 
 const dict = getDictionary(locale);
@@ -41,6 +48,7 @@ const cleanPath = localeAgnosticPath === "/"
 const baseOrigin = "https://soyaos.ai";
 
 const canonical = `${baseOrigin}/${locale}${cleanPath}`;
+const markdownAlternate = `${canonical}.md`;
 
 // hreflang map per Google Search Central — keys use BCP-47 standard casing.
 const languageAlternates: Record<string, string> = {};
@@ -59,10 +67,13 @@ const ogAlternateLocales = locales
 
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "WebSite",
+  "@type": schemaType,
   name: "SoyaOS",
   url: baseOrigin,
-  inLanguage: locales.map((l) => localeBcp47[l]),
+  headline: title,
+  description,
+  mainEntityOfPage: canonical,
+  inLanguage: localeBcp47[locale],
 };
 ---
 
@@ -75,6 +86,7 @@ const jsonLd = {
     <meta name="theme-color" content="#FBFAF5" />
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    <link rel="alternate" type="text/markdown" href={markdownAlternate} />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/logo.png" />
 

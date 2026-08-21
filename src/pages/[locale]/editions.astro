@@ -2,6 +2,10 @@
 import Marketing from "../../layouts/Marketing.astro";
 import { locales, type Locale } from "../../i18n/config";
 import { getDictionary } from "../../i18n/dictionaries";
+import {
+  editionMeta,
+  type EditionStatus as Status,
+} from "../../lib/public-content";
 
 export function getStaticPaths() {
   return locales.map((locale) => ({ params: { locale } }));
@@ -9,18 +13,6 @@ export function getStaticPaths() {
 
 const { locale } = Astro.params as { locale: Locale };
 const dict = getDictionary(locale);
-
-// Edition identity (untranslated brand-ish bits) paired with dict.editions.list
-// by index — keep the order in sync.
-type Status = "alpha" | "planned";
-const editionMeta: Array<{ name: string; cli: string; status: Status }> = [
-  { name: "Solo", cli: "solo", status: "alpha" },
-  { name: "Cluster", cli: "cluster", status: "planned" },
-  { name: "Cloud", cli: "cloud", status: "planned" },
-  { name: "Hybrid", cli: "hybrid", status: "planned" },
-  { name: "Enterprise Cloud", cli: "ent-cloud", status: "planned" },
-  { name: "Enterprise Private", cli: "ent-private", status: "planned" },
-];
 
 const editions = editionMeta.map((meta, i) => ({ ...meta, ...dict.editions.list[i] }));
 

@@ -22,6 +22,7 @@ const LOCALES = ["zh", "zh-hant", "en"];
 const DEFAULT_LOCALE = "zh";
 const UNMATCHED_LOCALE = "en";
 const HANT_REGIONS = new Set(["TW", "HK", "MO"]);
+const CANONICAL_ORIGIN = "https://soyaos.ai";
 
 function mapToLocale(tag) {
   const lower = tag.toLowerCase().trim();
@@ -81,6 +82,20 @@ export default {
       return Response.redirect(dest.toString(), 302);
     }
 
-    return env.ASSETS.fetch(request);
+    const response = await env.ASSETS.fetch(request);
+    if (!url.pathname.endsWith(".md") || !response.ok) return response;
+
+    const canonicalPath = url.pathname.slice(0, -3);
+    const headers = new Headers(response.headers);
+    headers.set("cache-control", "public, max-age=300");
+    headers.set("content-disposition", "inline");
+    headers.set("content-type", "text/markdown; charset=utf-8");
+    headers.set("link", `<${CANONICAL_ORIGIN}${canonicalPath}>; rel="canonical"`);
+    headers.set("x-robots-tag", "noindex");
+    return new Response(request.method === "HEAD" ? null : response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
   },
 };
