@@ -90,7 +90,7 @@ export default {
     headers.set("cache-control", "public, max-age=300");
     headers.set("content-disposition", "inline");
     headers.set("content-type", "text/markdown; charset=utf-8");
-    headers.set("link", `<${CANONICAL_ORIGIN}${canonicalPath}>; rel="canonical"`);
+    headers.set("link", `<${CANONICAL_ORIGIN}${canonicalPath}/>; rel="canonical"`);
     headers.set("x-robots-tag", "noindex");
     return new Response(request.method === "HEAD" ? null : response.body, {
       status: response.status,

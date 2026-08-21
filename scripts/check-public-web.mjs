@@ -29,7 +29,7 @@ for (const locale of locales) {
     );
     assert(markdown.startsWith("# "), `${markdownPath} has no heading`);
     assert(
-      markdown.includes(`Canonical HTML: https://soyaos.ai/${locale}${path}`),
+      markdown.includes(`Canonical HTML: https://soyaos.ai/${locale}${path}/`),
       `${markdownPath} has no canonical source pointer`,
     );
   }
@@ -52,7 +52,7 @@ const response = await worker.fetch(
 assert(response.headers.get("content-type") === "text/markdown; charset=utf-8", "wrong Markdown content type");
 assert(response.headers.get("x-robots-tag") === "noindex", "Markdown must be noindex");
 assert(
-  response.headers.get("link") === '<https://soyaos.ai/zh/docs/quickstart>; rel="canonical"',
+  response.headers.get("link") === '<https://soyaos.ai/zh/docs/quickstart/>; rel="canonical"',
   "wrong Markdown canonical Link header",
 );
 

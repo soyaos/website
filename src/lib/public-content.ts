@@ -22,7 +22,7 @@ export const editionMeta: Array<{ name: string; cli: string; status: EditionStat
 export type MarketingPage = "home" | "editions" | "pricing";
 
 function sourceFooter(locale: Locale, path: string): string {
-  return `\n\n---\n\nCanonical HTML: https://soyaos.ai/${locale}${path}`;
+  return `\n\n---\n\nCanonical HTML: https://soyaos.ai/${locale}${path}/`;
 }
 
 function homeMarkdown(locale: Locale): string {
@@ -113,7 +113,7 @@ export function docMarkdown(locale: Locale, entry: CollectionEntry<"docs">): str
 }
 
 export function markdownResponse(body: string, canonicalPath: string): Response {
-  const canonical = `https://soyaos.ai${canonicalPath}`;
+  const canonical = `https://soyaos.ai${canonicalPath}/`;
   return new Response(`${body.trim()}\n`, {
     headers: {
       "cache-control": "public, max-age=300",
