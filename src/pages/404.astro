@@ -1,0 +1,27 @@
+---
+Astro.response.status = 404;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Not found · SoyaOS</title>
+  </head>
+  <body>
+    <main>
+      <h1>Not found</h1>
+      <p>The requested SoyaOS page does not exist.</p>
+      <p><a href="/zh/">简体中文</a> · <a href="/zh-hant/">繁體中文</a> · <a href="/en/">English</a></p>
+    </main>
+  </body>
+</html>
+
+<style>
+  :global(:root) { color-scheme: light; font-family: system-ui, sans-serif; color: #2b2419; background: #fbfaf5; }
+  body { margin: 0; }
+  main { width: min(36rem, calc(100% - 3rem)); margin: 20vh auto 0; }
+  a { color: #236b42; }
+</style>

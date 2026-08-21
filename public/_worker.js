@@ -87,6 +87,20 @@ export default {
       return Response.redirect(dest.toString(), 302);
     }
 
+    // `/llm.txt` was never a public contract. Reject it explicitly so a
+    // platform SPA fallback cannot turn the missing path into a misleading
+    // 200 HTML response. The only agent index is `/llms.txt`.
+    if (url.pathname === "/llm.txt") {
+      return new Response(request.method === "HEAD" ? null : "Not found.\n", {
+        status: 404,
+        headers: {
+          "cache-control": "public, max-age=300",
+          "content-type": "text/plain; charset=utf-8",
+          "x-robots-tag": "noindex, nofollow",
+        },
+      });
+    }
+
     const response = await env.ASSETS.fetch(request);
     const discoveryContentType = DISCOVERY_CONTENT_TYPES.get(url.pathname);
     if (discoveryContentType && response.ok) {

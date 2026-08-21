@@ -43,6 +43,7 @@ function markdownFiles(directory) {
 }
 
 assert(markdownFiles(rootPath).length === 48, "expected 48 localized Markdown outputs");
+assert(read("404.html").includes('content="noindex, nofollow"'), "custom 404 page must be noindex");
 
 const robots = read("robots.txt");
 assert(robots.includes("User-agent: *\nAllow: /"), "robots must allow public crawling");
@@ -85,5 +86,11 @@ const llmsResponse = await worker.fetch(
   { ASSETS: { fetch: async () => new Response(llms) } },
 );
 assert(llmsResponse.headers.get("content-type") === "text/markdown; charset=utf-8", "wrong llms.txt content type");
+
+const singularLlmsResponse = await worker.fetch(
+  new Request("https://soyaos.ai/llm.txt"),
+  { ASSETS: { fetch: async () => new Response("must not run") } },
+);
+assert(singularLlmsResponse.status === 404, "the obsolete singular /llm.txt path must be absent");
 
 console.log("public discovery contract: 48 HTML/Markdown pairs verified");
