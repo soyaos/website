@@ -23,6 +23,11 @@ const DEFAULT_LOCALE = "zh";
 const UNMATCHED_LOCALE = "en";
 const HANT_REGIONS = new Set(["TW", "HK", "MO"]);
 const CANONICAL_ORIGIN = "https://soyaos.ai";
+const DISCOVERY_CONTENT_TYPES = new Map([
+  ["/robots.txt", "text/plain; charset=utf-8"],
+  ["/sitemap.xml", "application/xml; charset=utf-8"],
+  ["/llms.txt", "text/markdown; charset=utf-8"],
+]);
 
 function mapToLocale(tag) {
   const lower = tag.toLowerCase().trim();
@@ -83,6 +88,17 @@ export default {
     }
 
     const response = await env.ASSETS.fetch(request);
+    const discoveryContentType = DISCOVERY_CONTENT_TYPES.get(url.pathname);
+    if (discoveryContentType && response.ok) {
+      const headers = new Headers(response.headers);
+      headers.set("cache-control", "public, max-age=300");
+      headers.set("content-type", discoveryContentType);
+      return new Response(request.method === "HEAD" ? null : response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers,
+      });
+    }
     if (!url.pathname.endsWith(".md") || !response.ok) return response;
 
     const canonicalPath = url.pathname.slice(0, -3);

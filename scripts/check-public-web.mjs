@@ -44,6 +44,30 @@ function markdownFiles(directory) {
 
 assert(markdownFiles(rootPath).length === 48, "expected 48 localized Markdown outputs");
 
+const robots = read("robots.txt");
+assert(robots.includes("User-agent: *\nAllow: /"), "robots must allow public crawling");
+assert(robots.includes("Sitemap: https://soyaos.ai/sitemap.xml"), "robots has no sitemap");
+
+const sitemap = read("sitemap.xml");
+const sitemapLocations = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
+assert(sitemapLocations.length === 48, "sitemap must contain 48 canonical HTML URLs");
+assert(sitemapLocations.every((url) => url.endsWith("/") && !url.endsWith(".md/")), "sitemap contains a non-canonical URL");
+for (const url of sitemapLocations) {
+  const path = new URL(url).pathname.slice(1);
+  assert(read(`${path}index.html`).includes(`rel="canonical" href="${url}"`), `${url} is not a canonical 200 build output`);
+}
+assert((sitemap.match(/hreflang="zh-CN"/g) ?? []).length === 48, "sitemap zh alternates are incomplete");
+assert((sitemap.match(/hreflang="zh-Hant"/g) ?? []).length === 48, "sitemap zh-hant alternates are incomplete");
+assert((sitemap.match(/hreflang="en-US"/g) ?? []).length === 48, "sitemap en alternates are incomplete");
+assert((sitemap.match(/hreflang="x-default"/g) ?? []).length === 48, "sitemap x-default alternates are incomplete");
+
+const llms = read("llms.txt");
+const llmsLinks = [...llms.matchAll(/\]\((https:\/\/soyaos\.ai\/[^)]+\.md)\)/g)].map((match) => match[1]);
+assert(llmsLinks.length === 48, "llms.txt must list every public Markdown representation");
+for (const url of llmsLinks) {
+  assert(read(new URL(url).pathname.slice(1)).startsWith("# "), `${url} is not a real Markdown output`);
+}
+
 const markdownAsset = new Response("# Test\n", { headers: { etag: "example" } });
 const response = await worker.fetch(
   new Request("https://soyaos.ai/zh/docs/quickstart.md"),
@@ -56,4 +80,10 @@ assert(
   "wrong Markdown canonical Link header",
 );
 
-console.log("public HTML/Markdown contract: 48 pairs verified");
+const llmsResponse = await worker.fetch(
+  new Request("https://soyaos.ai/llms.txt"),
+  { ASSETS: { fetch: async () => new Response(llms) } },
+);
+assert(llmsResponse.headers.get("content-type") === "text/markdown; charset=utf-8", "wrong llms.txt content type");
+
+console.log("public discovery contract: 48 HTML/Markdown pairs verified");
