@@ -1,14 +1,14 @@
 ---
 title: 版本
 description: 同一份二進位衍生出的六種部署型態——從 Solo 到 Enterprise Private。
-order: 3
+order: 4
 category: getting-started
 ---
 
-SoyaOS 是一份二進位。所謂*版本*,就是部署型態——節點角色跑在哪裡、由誰維運、它們怎麼聯邦。變的只有一行 CLI 參數。
+SoyaOS 的*版本*描述控制面與工作負載跑在哪裡、由誰維運。Solo 使用本機二進位；Cloud v0.2.0 是已經上線的代管文字 Agent 服務，透過開發者入口網站和 OpenAI 相容 API 使用。其他版本仍屬於路線圖。
 
 ```bash
-soyaos start --edition solo      # 或 cluster | cloud | hybrid | ent-cloud | ent-private
+soyaos start --edition solo      # 目前本機執行入口
 ```
 
 ## 矩陣
@@ -17,16 +17,16 @@ soyaos start --edition solo      # 或 cluster | cloud | hybrid | ent-cloud | en
 | -------------------- | ---------------------------------- | -------------------------------------- | ------------------------------------- | ------------------------------ | ----------- |
 | `solo`               | 行程內                             | 行程內                                 | 一個開發者、一台筆電                   | 免費 · 你的硬體                | alpha 在用  |
 | `cluster`            | 自管 Planet 在你的 VPS             | 自管 Comet 在你的 LAN / VPC            | 一個團隊 + 一台 VPS + 內網裝置         | 約 $0.10 / Comet·小時(估)      | 規劃中      |
-| `cloud`              | soyaos.ai 代管 Planet              | soyaos.ai 代管 Comet                   | 註冊、拿 API Key、開工                 | 按 token + 按 Comet·秒         | 規劃中      |
+| `cloud`              | 代管個人租戶與 API Key              | 平台審核的代管文字 Agent                | 註冊、拿 API Key、開工                 | 目前免費 · 有每日額度           | Stable v0.2.0 |
 | `hybrid`             | soyaos.ai 代管 Planet              | 你 VPC / 自有機房裡的 Comet            | SaaS Planet,你自己的 Moon              | 按 token(只算控制面)           | 規劃中      |
 | `ent-cloud`          | 獨佔 Planet(依 region 綁定)        | 獨佔 Comet 池                          | 多租戶 SaaS + SSO + SLA                | 聯絡我們                       | 規劃中      |
 | `ent-private`        | 客戶自管 Planet                    | 客戶自管 Comet                         | 本地化 / 實體隔離網路                  | 年度授權                       | 規劃中      |
 
-> 所有版本都跑**同一份 SoyaPack** 格式,對外暴露**同一份 OpenAI 相容** API。唯一變化是「你維運」與「我們維運」的邊界畫在哪裡——在 `solo` 裡這兩端摺疊到筆電上的一個行程。
+> 各版本都以 **OpenAI 相容 API** 作為主要呼叫面。Cloud v0.2.0 目前只開放平台審核的文字 Agent，不支援上傳或執行使用者自己的 SoyaPack；完整 Cloud 架構仍是路線圖。
 
 ## 決策樹
 
-按列往下比對,第一個命中的就選;新手預設 **solo**。
+按列往下比對，第一個命中的就選：不想安裝或維運時從 **cloud** 開始；想完全在自己電腦上執行時從 **solo** 開始。
 
 | 如果……                                                              | ……選         |
 | -------------------------------------------------------------------- | ------------- |
@@ -55,12 +55,14 @@ Planet、Moon、Comet 摺疊成機器上的單一行程。無註冊中心、無�
 - **鑑權**:初期共享組織 token,長大後切 OIDC。
 - **網路**:Comet 只需對 Planet 出網 HTTPS;不需要可入站。
 
-### `cloud` — 代管 Planet + 代管 Comet
+### `cloud` — 代管文字 Agent
 
-我們維運一切,你只持有 API Key。「拿到一個能跑的 Agent endpoint」最快的路徑。隨時切到自己的 BYOK 模型 Key,自此只為我們實際排程的算力付費、不再為推理付費。
+Cloud v0.2.0 已正式發布。開啟 [Cloud 快速上手](/zh-hant/docs/cloud-quickstart)，使用 GitHub 登入、建立 API Key，即可呼叫 `https://api.soyaos.ai/v1` 上的 `soya:starter`。
 
-- **Region**:alpha → beta 期間待定。
-- **資料**:傳輸與儲存都加密;我們不在你的資料上訓練。
+- **生命週期**：Stable v0.2.0；目前免費、單區、best-effort、無 SLA。
+- **能力**：平台審核的文字 Agent；不支援 BYOK、自訂 SoyaPack、工具或任意程式碼執行。
+- **資料**：請求中繼資料與 Trace 保留 24 小時；預設不持久化 prompt / response 內文。
+- **入口**：[developer.soyaos.ai](https://developer.soyaos.ai/zh-hant)；API Base URL 為 `https://api.soyaos.ai/v1`。
 
 ### `hybrid` — 代管 Planet,你的 Comet
 
@@ -84,7 +86,7 @@ Planet、Moon、Comet 摺疊成機器上的單一行程。無註冊中心、無�
 | 從           | 到           | 變了什麼                                                             |
 | ------------ | ------------ | -------------------------------------------------------------------- |
 | `solo`       | `cluster`    | 狀態從本地 SQLite → Postgres;Comet 指向 Planet URL。                  |
-| `cluster`    | `cloud`      | 把 SoyaPack 重新發布到我們倉庫;API Key 切到我們的。                  |
+| `cluster`    | `cloud`      | v0.2.0 暫不接受自訂 SoyaPack；應用程式只能改用目前審核 Agent 與 Cloud API Key。 |
 | `cluster`    | `hybrid`     | Comet 不動;Planet URL 切到我們的。                                   |
 | `cloud`      | `hybrid`     | 在你 VPC 裡起 Comet;只切 Comet 一端。                                |
 | `*`          | `ent-private`| 人工——聯絡我們。實體隔離意味著我們寄你一份簽名離線包。                |
@@ -102,10 +104,10 @@ soyaos join --moon https://moon.example.com --token <invite>
 
 ## 跨版本不變的東西
 
-- **SoyaPack 格式**(`soyapack.yaml` v0)。
 - **OpenAI 相容 surface** 在 `/v1/chat/completions`。
-- **能力白名單**——同一種形狀,同一份強制。
-- **Scope 事件 schema**——你的儀表板、告警、稽核日誌都預期同一份 JSON。
-- **CLI 命令**——`pack`、`run`、`serve`、`auth`、`join`。只是參數不同。
+- **模型 ID** 使用 `soya:*` 形狀。
+- **錯誤回應** 使用 OpenAI 相容 envelope。
+
+Solo 與未來自管版本繼續使用 SoyaPack、能力白名單、Scope 事件和 CLI。Cloud v0.2.0 只複用呼叫合約，不承諾開放這些部署能力。
 
 矩陣背後的 Planet / Moon / Comet 模型,見[架構](./architecture.md)。

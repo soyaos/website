@@ -7,6 +7,22 @@ const root = new URL("../dist/", import.meta.url);
 const rootPath = fileURLToPath(root);
 const locales = ["zh", "zh-hant", "en"];
 const editorialPaths = ["", "/editions", "/pricing", "/docs"];
+const expectedDocSlugs = [
+  "quickstart",
+  "cloud-quickstart",
+  "architecture",
+  "editions",
+  "capabilities-sandbox",
+  "virtual-models",
+  "scope-events",
+  "writing-an-agent",
+  "self-host-moon",
+  "sign-and-publish",
+  "soyapack-v0",
+  "cli-v0",
+  "http-api",
+];
+const expectedPublicPairs = locales.length * (editorialPaths.length + expectedDocSlugs.length);
 
 function read(relativePath) {
   return readFileSync(new URL(relativePath, root), "utf8");
@@ -42,8 +58,30 @@ function markdownFiles(directory) {
   });
 }
 
-assert(markdownFiles(rootPath).length === 48, "expected 48 localized Markdown outputs");
+assert(
+  markdownFiles(rootPath).length === expectedPublicPairs,
+  `expected ${expectedPublicPairs} localized Markdown outputs`,
+);
 assert(read("404.html").includes('content="noindex, nofollow"'), "custom 404 page must be noindex");
+
+for (const locale of locales) {
+  const path = `${locale}/docs/cloud-quickstart`;
+  const html = read(`${path}.html`);
+  const markdown = read(`${path}.md`);
+  const canonical = `https://soyaos.ai/${path}`;
+  assert(html.includes(`rel="canonical" href="${canonical}"`), `${path} has no slashless canonical`);
+  assert(
+    html.includes(`rel="alternate" type="text/markdown" href="${canonical}.md"`),
+    `${path} has no Markdown alternate`,
+  );
+  assert(html.includes("https://api.soyaos.ai/v1/chat/completions"), `${path} has no production Cloud call`);
+  assert(markdown.includes("soya:starter"), `${path}.md has no starter scenario`);
+  assert(markdown.includes(`Canonical HTML: ${canonical}`), `${path}.md has no canonical source pointer`);
+  assert(
+    read(`${locale}/docs.html`).includes(`href="/${locale}/docs/cloud-quickstart"`),
+    `${locale}/docs does not expose the Cloud quickstart`,
+  );
+}
 
 const robots = read("robots.txt");
 assert(robots.includes("User-agent: *\nAllow: /"), "robots must allow public crawling");
@@ -51,20 +89,23 @@ assert(robots.includes("Sitemap: https://soyaos.ai/sitemap.xml"), "robots has no
 
 const sitemap = read("sitemap.xml");
 const sitemapLocations = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
-assert(sitemapLocations.length === 48, "sitemap must contain 48 canonical HTML URLs");
+assert(
+  sitemapLocations.length === expectedPublicPairs,
+  `sitemap must contain ${expectedPublicPairs} canonical HTML URLs`,
+);
 assert(sitemapLocations.every((url) => !new URL(url).pathname.endsWith("/")), "sitemap contains a trailing-slash URL");
 for (const url of sitemapLocations) {
   const path = new URL(url).pathname.slice(1);
   assert(read(`${path}.html`).includes(`rel="canonical" href="${url}"`), `${url} is not a canonical 200 build output`);
 }
-assert((sitemap.match(/hreflang="zh-CN"/g) ?? []).length === 48, "sitemap zh alternates are incomplete");
-assert((sitemap.match(/hreflang="zh-Hant"/g) ?? []).length === 48, "sitemap zh-hant alternates are incomplete");
-assert((sitemap.match(/hreflang="en-US"/g) ?? []).length === 48, "sitemap en alternates are incomplete");
-assert((sitemap.match(/hreflang="x-default"/g) ?? []).length === 48, "sitemap x-default alternates are incomplete");
+assert((sitemap.match(/hreflang="zh-CN"/g) ?? []).length === expectedPublicPairs, "sitemap zh alternates are incomplete");
+assert((sitemap.match(/hreflang="zh-Hant"/g) ?? []).length === expectedPublicPairs, "sitemap zh-hant alternates are incomplete");
+assert((sitemap.match(/hreflang="en-US"/g) ?? []).length === expectedPublicPairs, "sitemap en alternates are incomplete");
+assert((sitemap.match(/hreflang="x-default"/g) ?? []).length === expectedPublicPairs, "sitemap x-default alternates are incomplete");
 
 const llms = read("llms.txt");
 const llmsLinks = [...llms.matchAll(/\]\((https:\/\/soyaos\.ai\/[^)]+\.md)\)/g)].map((match) => match[1]);
-assert(llmsLinks.length === 48, "llms.txt must list every public Markdown representation");
+assert(llmsLinks.length === expectedPublicPairs, "llms.txt must list every public Markdown representation");
 for (const url of llmsLinks) {
   assert(read(new URL(url).pathname.slice(1)).startsWith("# "), `${url} is not a real Markdown output`);
 }
@@ -119,4 +160,4 @@ for (const path of ["/en/", "/en/docs/", "/zh/docs/scope-events/"]) {
   );
 }
 
-console.log("public discovery contract: 48 HTML/Markdown pairs verified");
+console.log(`public discovery contract: ${expectedPublicPairs} HTML/Markdown pairs verified`);

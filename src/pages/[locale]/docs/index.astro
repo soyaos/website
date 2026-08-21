@@ -21,6 +21,8 @@ const dataBySlug = new Map(
     return [slug, e.data] as const;
   }),
 );
+const cloudQuickstartTitle = dataBySlug.get("cloud-quickstart")?.title ?? "Cloud quickstart";
+const soloQuickstartTitle = dataBySlug.get("quickstart")?.title ?? dict.docs.indexCtaQuickstart;
 
 // Build a section list keyed by category for the landing grid. Skips
 // missing slugs gracefully so a partial translation doesn't break the
@@ -58,10 +60,17 @@ const sections = sidebar.map((s) => ({
         <p class="mt-3 max-w-2xl text-[16px] leading-[1.6] text-soya-mute">
           {dict.docs.indexIntro}
         </p>
-        <div class="mt-6">
-          <LocaleLink href="/docs/quickstart" locale={locale} class="soya-btn-primary">
-            {dict.docs.indexCtaQuickstart}
+        <div class="mt-6 flex flex-wrap gap-3">
+          <LocaleLink href="/docs/cloud-quickstart" locale={locale} class="soya-btn-primary">
+            {cloudQuickstartTitle}
             <span aria-hidden="true">→</span>
+          </LocaleLink>
+          <LocaleLink
+            href="/docs/quickstart"
+            locale={locale}
+            class="inline-flex items-center justify-center rounded-lg border border-soya-border bg-soya-panel px-5 py-2.5 text-sm font-semibold text-soya-ink transition-colors hover:border-soya-accent hover:text-soya-accentDeep"
+          >
+            {soloQuickstartTitle}
           </LocaleLink>
         </div>
       </header>

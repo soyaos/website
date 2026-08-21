@@ -9,14 +9,14 @@ export const storyMeta = [
   { id: "DD-011", emoji: "🎬", name: "SilentCut", repo: "https://github.com/soyaos/example-silentcut" },
 ] as const;
 
-export type EditionStatus = "alpha" | "planned";
-export const editionMeta: Array<{ name: string; cli: string; status: EditionStatus }> = [
-  { name: "Solo", cli: "solo", status: "alpha" },
-  { name: "Cluster", cli: "cluster", status: "planned" },
-  { name: "Cloud", cli: "cloud", status: "planned" },
-  { name: "Hybrid", cli: "hybrid", status: "planned" },
-  { name: "Enterprise Cloud", cli: "ent-cloud", status: "planned" },
-  { name: "Enterprise Private", cli: "ent-private", status: "planned" },
+export type EditionStatus = "alpha" | "stable" | "planned";
+export const editionMeta: Array<{ name: string; cli: string; entry: string; status: EditionStatus }> = [
+  { name: "Solo", cli: "solo", entry: "soyaos start --edition solo", status: "alpha" },
+  { name: "Cluster", cli: "cluster", entry: "soyaos start --edition cluster", status: "planned" },
+  { name: "Cloud", cli: "cloud", entry: "developer.soyaos.ai", status: "stable" },
+  { name: "Hybrid", cli: "hybrid", entry: "soyaos start --edition hybrid", status: "planned" },
+  { name: "Enterprise Cloud", cli: "ent-cloud", entry: "soyaos start --edition ent-cloud", status: "planned" },
+  { name: "Enterprise Private", cli: "ent-private", entry: "soyaos start --edition ent-private", status: "planned" },
 ];
 
 export type MarketingPage = "home" | "editions" | "pricing";
@@ -51,11 +51,11 @@ function editionsMarkdown(locale: Locale): string {
   const dict = getDictionary(locale);
   const editions = editionMeta.map((meta, index) => ({ ...meta, ...dict.editions.list[index] }));
   const rows = editions.map((edition) =>
-    `| ${edition.name} | \`${edition.cli}\` | ${edition.persona} | ${edition.cost} | ${edition.status === "alpha" ? dict.editions.table.badgeAlpha : dict.editions.table.badgePlanned} |`,
+    `| ${edition.name} | \`${edition.entry}\` | ${edition.persona} | ${edition.cost} | ${edition.status === "alpha" ? dict.editions.table.badgeAlpha : edition.status === "stable" ? dict.editions.table.badgeStable : dict.editions.table.badgePlanned} |`,
   ).join("\n");
   const details = editions.map((edition) => [
     `## ${edition.name}`,
-    `\`soyaos start --edition ${edition.cli}\``,
+    `\`${edition.entry}\``,
     edition.description,
     `- ${dict.editions.detail.controlPlane}: ${edition.controlPlane}`,
     `- ${dict.editions.detail.dataPlane}: ${edition.dataPlane}`,

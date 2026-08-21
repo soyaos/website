@@ -26,6 +26,7 @@ export const sidebar: SidebarSection[] = [
     category: "getting-started",
     entries: [
       { slug: "quickstart" },
+      { slug: "cloud-quickstart" },
       { slug: "architecture" },
       { slug: "editions" },
     ],

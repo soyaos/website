@@ -11,7 +11,7 @@ export const en = {
       "SoyaOS ships as one binary in six deployment shapes — Solo, Cluster, Cloud, Hybrid, Enterprise Cloud, Enterprise Private. Pick the one that fits today; switch later without rewriting.",
     pricingTitle: "Pricing · SoyaOS",
     pricingDescription:
-      "SoyaOS is free during the alpha — MIT-licensed open source, no telemetry, no usage caps. Future cloud edition will be per-token + per-second sandbox; core kernel stays MIT forever.",
+      "Solo remains MIT-licensed; Cloud v0.2.0 is currently free with daily quotas. Paid plans, metering, and billing are not live.",
     docsTitle: "Documentation · SoyaOS",
   },
 
@@ -120,24 +120,25 @@ export const en = {
         lead: "The ",
         em: "edition",
         tail:
-          " isn't a different product — it's where the Planet (control), Moons (UI / edge) and Comets (workers) run, and who runs them. The CLI flag is all that changes.",
+          " describes where the control plane and workloads run and who operates them. Solo uses the local binary; Cloud v0.2.0 uses the hosted Portal and API.",
       },
-      codeComment: "# or cluster | cloud | hybrid | ...",
+      codeComment: "# local Solo entry point",
     },
     table: {
       colEdition: "Edition",
-      colCli: "CLI",
+      colCli: "Entry point",
       colPersona: "Persona",
       colCost: "Typical cost",
       colStatus: "Status",
       badgeAlpha: "alpha now",
+      badgeStable: "Stable v0.2.0",
       badgePlanned: "planned",
     },
     detail: {
       eyebrow: "Where things run",
       title: "Control plane vs. data plane, per edition.",
       intro:
-        'Same binary, six split points. The boundary between "you operate it" and "we operate it" is the only knob.',
+        "Solo and Cloud are available now; the remaining shapes are roadmap items. Cloud v0.2.0 is a controlled text-Agent service, not the full target Cloud architecture.",
       controlPlane: "Control plane",
       dataPlane: "Data plane",
     },
@@ -160,11 +161,11 @@ export const en = {
       },
       {
         persona: "Register, get an API key, ship.",
-        cost: "per-token + per Comet·sec",
-        controlPlane: "soyaos.ai-managed Planet",
-        dataPlane: "soyaos.ai-managed Comets",
+        cost: "currently free · daily quotas",
+        controlPlane: "SoyaOS-hosted personal tenant and API keys",
+        dataPlane: "platform-reviewed hosted text Agent",
         description:
-          "We run the Planet and the Comets. You hold an API key. Drop in your own BYOK model key at any time and stop paying us for inference — only for compute.",
+          "Stable v0.2.0: sign in with GitHub, create an API key, call soya:starter through the OpenAI-compatible API, and inspect 24-hour trace metadata. Currently free, single-region, best-effort, and without an SLA.",
       },
       {
         persona: "SaaS Planet, your Moon.",
@@ -194,22 +195,22 @@ export const en = {
     closing: {
       title: "Not sure which fits?",
       bodyParts: {
-        lead: "Start with ",
-        solo: "solo",
-        mid: ". Graduate to ",
-        cluster: "cluster",
-        tail: " when your laptop fan gets loud. Everything else is the same kernel.",
+        lead: "Choose ",
+        solo: "Cloud",
+        mid: " for no installation or operations; choose ",
+        cluster: "Solo",
+        tail: " to run fully on your own computer. Other shapes remain planned.",
       },
-      cta: "Download v0.1",
+      cta: "Cloud quickstart",
     },
   },
 
   pricing: {
     hero: {
       pill: "Pricing",
-      title: "Free for everyone during alpha.",
+      title: "Solo and Cloud v0.2.0 are currently free.",
       subtitle:
-        "SoyaOS is MIT-licensed open source. We're not running a managed cloud yet, so there's no meter, no key, no plan to pick.",
+        "Solo is MIT-licensed open source. Cloud is live as Stable v0.2.0 with API keys and daily quotas, but no paid plans, metered bill, or SLA.",
     },
     banner: {
       eyebrow: "Alpha",
@@ -228,12 +229,12 @@ export const en = {
       eyebrow: "When we monetize",
       title: "The plan after GA.",
       intro:
-        "Nothing below is live or billed yet. We're publishing the intent now so you can audit it against what eventually ships.",
+        "Cloud v0.2.0 is live and free. The paid, BYOK, sandbox, and enterprise capabilities below are not live and are not being billed.",
       futureLabel: "Future",
       list: [
         {
-          title: "Cloud edition",
-          body: "Per-token + per-second sandbox (gpu·s / vcpu·s) — a transparent cloud LLM provider. Drop in your BYOK key any time and stop paying us for inference; you only pay for the compute we actually scheduled.",
+          title: "Future Cloud paid plans",
+          body: "We plan transparent per-token and per-sandbox-second metering and are evaluating BYOK. These are not current v0.2.0 capabilities or pricing commitments.",
         },
         {
           title: "Enterprise",
@@ -271,7 +272,7 @@ export const en = {
   docs: {
     indexTitle: "Documentation",
     indexIntro:
-      "Everything you need to ship your first Agent with SoyaOS. Five reference pages cover install, the three node roles, the SoyaPack manifest, and the v0 CLI.",
+      "Run your first SoyaOS Agent with hosted Cloud or local Solo, then explore the architecture, SoyaPack, API, and CLI.",
     indexCtaQuickstart: "Start with Quickstart",
     searchPlaceholder: "Search docs…",
     searchLabel: "Search",

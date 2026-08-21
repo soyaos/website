@@ -1,7 +1,7 @@
 ---
 title: Architecture
 description: Planet, Moon, and Comet — the three node roles that compose every SoyaOS deployment.
-order: 2
+order: 3
 category: getting-started
 ---
 

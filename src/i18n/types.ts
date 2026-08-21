@@ -93,6 +93,7 @@ export interface Dictionary {
       colCost: string;
       colStatus: string;
       badgeAlpha: string;
+      badgeStable: string;
       badgePlanned: string;
     };
     detail: {

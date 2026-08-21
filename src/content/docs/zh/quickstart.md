@@ -1,11 +1,13 @@
 ---
-title: 快速上手
-description: 五分钟从零跑起 soya:echo Agent。
+title: Solo 本地快速上手
+description: 五分钟在自己的电脑上从零跑起 soya:echo Agent。
 order: 1
 category: getting-started
 ---
 
 从「什么都没装」到「`soya:echo` 跑起来」，五分钟搞定。整个过程都在你的笔记本上的 `solo` 版本里跑——不用注册、不要 API Key、零遥测。
+
+想跳过安装和运维，直接调用托管 Agent？请改看 [Cloud 快速上手](/zh/docs/cloud-quickstart)。
 
 ## 1. 安装
 

@@ -1,14 +1,14 @@
 ---
 title: Editions
 description: Six deployment shapes from one binary — Solo to Enterprise Private.
-order: 3
+order: 4
 category: getting-started
 ---
 
-SoyaOS is one binary. The *edition* is a deployment shape — which node roles run where, who operates them, and how they federate. The CLI flag is the only line you change.
+The SoyaOS *edition* describes where the control plane and workloads run and who operates them. Solo uses the local binary. Cloud v0.2.0 is a live hosted text-Agent service consumed through the Developer Portal and OpenAI-compatible API. The other editions remain roadmap items.
 
 ```bash
-soyaos start --edition solo      # or cluster | cloud | hybrid | ent-cloud | ent-private
+soyaos start --edition solo      # current local entry point
 ```
 
 ## The matrix
@@ -17,16 +17,16 @@ soyaos start --edition solo      # or cluster | cloud | hybrid | ent-cloud | ent
 | -------------------- | ---------------------------------- | ----------------------------------- | ------------------------------------------ | -------------------------------- | ---------- |
 | `solo`               | in-process                         | in-process                          | One dev, one laptop                        | Free · your hardware             | alpha now  |
 | `cluster`            | self-hosted Planet on your VPS     | self-hosted Comets in your LAN/VPC  | A team + VPS + intranet devices            | ~$0.10 / Comet·hr (est.)         | planned    |
-| `cloud`              | soyaos.ai-managed Planet           | soyaos.ai-managed Comets            | Register, get an API key, ship             | per-token + per Comet·sec        | planned    |
+| `cloud`              | hosted personal tenant and API keys| platform-reviewed hosted text Agent | Register, get an API key, ship             | currently free · daily quotas    | Stable v0.2.0 |
 | `hybrid`             | soyaos.ai-managed Planet           | your Comets in your VPC / on-prem   | SaaS Planet, your Moon                     | per-token (control plane only)   | planned    |
 | `ent-cloud`          | dedicated Planet (region pinned)   | dedicated Comet pool                | Multi-tenant SaaS with SSO and SLA         | contact us                       | planned    |
 | `ent-private`        | customer-operated Planet           | customer-operated Comets            | On-prem or air-gapped                      | annual license                   | planned    |
 
-> Every edition runs the **same SoyaPack** format and exposes the **same OpenAI-compatible** API. The only thing that changes is the split point between "you operate it" and "we operate it" — and in `solo`, both ends collapse into a single process on your laptop.
+> Each edition uses an **OpenAI-compatible API** as its primary call surface. Cloud v0.2.0 currently exposes platform-reviewed text Agents only; it does not accept or run user-supplied SoyaPacks. The complete Cloud architecture remains a roadmap.
 
 ## Decision tree
 
-Pick the first row that matches; default to **solo** if you're new.
+Pick the first row that matches: start with **cloud** when you want no installation or operations, and with **solo** when you want everything on your own computer.
 
 | If…                                                                          | …pick this   |
 | ---------------------------------------------------------------------------- | ------------ |
@@ -55,12 +55,14 @@ The default shape for an early-stage engineering team. One small VPS hosts the P
 - **Auth**: shared org token at first, OIDC once you outgrow it.
 - **Networking**: Comets only need outbound HTTPS to the Planet; they don't need to be reachable.
 
-### `cloud` — managed Planet + managed Comets
+### `cloud` — hosted text Agent
 
-We run everything. You hold an API key. The fastest path to "I have a working Agent endpoint." Drop in your own BYOK model key at any time and you stop paying us for inference — only for the compute we actually scheduled.
+Cloud v0.2.0 is live. Follow the [Cloud quickstart](/en/docs/cloud-quickstart), sign in with GitHub, and create an API key to call `soya:starter` at `https://api.soyaos.ai/v1`.
 
-- **Regions**: tba (TBD pending alpha → beta).
-- **Data**: your inputs/outputs are encrypted in transit and at rest. We do not train on them.
+- **Lifecycle**: Stable v0.2.0; currently free, single-region, best-effort, and without an SLA.
+- **Capabilities**: platform-reviewed text Agents only; no BYOK, custom SoyaPacks, tools, or arbitrary code execution.
+- **Data**: request and trace metadata is retained for 24 hours; prompt and response bodies are not persisted by default.
+- **Entry point**: [developer.soyaos.ai](https://developer.soyaos.ai/en); the API base URL is `https://api.soyaos.ai/v1`.
 
 ### `hybrid` — managed Planet, your Comets
 
@@ -84,7 +86,7 @@ There is no separate install — `soyaos` is the same binary. Switching is a con
 | From       | To           | What changes                                                              |
 | ---------- | ------------ | ------------------------------------------------------------------------- |
 | `solo`     | `cluster`    | Move state from local SQLite → Postgres; point Comets at the Planet URL.  |
-| `cluster`  | `cloud`      | Re-publish SoyaPacks to our registry; switch API keys to ours.            |
+| `cluster`  | `cloud`      | v0.2.0 does not accept custom SoyaPacks; applications must use a reviewed Agent and a Cloud API key. |
 | `cluster`  | `hybrid`     | Same Comets; the Planet URL flips to ours.                                |
 | `cloud`    | `hybrid`     | Spin up Comets in your VPC; flip Comets-only.                             |
 | `*`        | `ent-private`| Manual — talk to us. Air-gapped means we ship you a signed offline bundle.|
@@ -102,10 +104,10 @@ soyaos join --moon https://moon.example.com --token <invite>
 
 ## What stays the same across editions
 
-- **SoyaPack format** (`soyapack.yaml` v0).
 - **OpenAI-compatible surface** on `/v1/chat/completions`.
-- **Capability allowlists** — same shape, same enforcement.
-- **Scope event schema** — your dashboards, alerts and audit log expect the same JSON.
-- **CLI verbs** — `pack`, `run`, `serve`, `auth`, `join`. Only the flags differ.
+- **Model IDs** use the `soya:*` shape.
+- **Errors** use an OpenAI-compatible envelope.
+
+Solo and future self-hosted editions continue to use SoyaPacks, capability allowlists, Scope events, and the CLI. Cloud v0.2.0 reuses the call contract but does not promise those deployment capabilities.
 
 See [Architecture](./architecture.md) for the Planet / Moon / Comet model behind the matrix.

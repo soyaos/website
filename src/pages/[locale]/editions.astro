@@ -19,6 +19,8 @@ const editions = editionMeta.map((meta, i) => ({ ...meta, ...dict.editions.list[
 const statusBadge = (s: Status) =>
   s === "alpha"
     ? { label: dict.editions.table.badgeAlpha, className: "bg-soya-skin text-soya-accentDeep" }
+    : s === "stable"
+      ? { label: dict.editions.table.badgeStable, className: "bg-green-100 text-green-800" }
     : { label: dict.editions.table.badgePlanned, className: "bg-soya-surface text-soya-mute" };
 ---
 
@@ -65,7 +67,7 @@ const statusBadge = (s: Status) =>
                   <td class="px-5 py-4 font-semibold text-soya-ink">{e.name}</td>
                   <td class="px-5 py-4">
                     <code class="rounded bg-soya-panel px-2 py-1 font-mono text-[12.5px] text-soya-ink">
-                      {e.cli}
+                      {e.entry}
                     </code>
                   </td>
                   <td class="px-5 py-4 text-soya-mute">{e.persona}</td>
@@ -111,7 +113,7 @@ const statusBadge = (s: Status) =>
                 </span>
               </div>
               <p class="mt-1 font-mono text-[12px] text-soya-accentDeep">
-                soyaos start --edition {e.cli}
+                {e.entry}
               </p>
               <p class="mt-4 text-[14px] leading-relaxed text-soya-mute">
                 {e.description}
@@ -150,11 +152,11 @@ const statusBadge = (s: Status) =>
         </p>
       </div>
       <a
-        href="https://github.com/soyaos/soyaos/releases"
+        href={`/${locale}/docs/cloud-quickstart`}
         class="soya-btn-primary"
-        rel="noopener noreferrer"
-        target="_blank">{dict.editions.closing.cta}</a
       >
+        {dict.editions.closing.cta}
+      </a>
     </div>
   </section>
 </Marketing>

@@ -1,11 +1,13 @@
 ---
-title: Quickstart
-description: Five minutes from zero to a running soya:echo Agent.
+title: Solo local quickstart
+description: Five minutes from zero to a running soya:echo Agent on your own computer.
 order: 1
 category: getting-started
 ---
 
 Five minutes from "nothing installed" to a running `soya:echo`. This walkthrough runs entirely on your laptop in the `solo` edition — no signup, no API key, no telemetry.
+
+Want to skip installation and operations and call a hosted Agent instead? Follow the [Cloud quickstart](/en/docs/cloud-quickstart).
 
 ## 1. Install
 

@@ -1,7 +1,7 @@
 ---
 title: 架构
 description: Planet、Moon、Comet——组成每一种 SoyaOS 部署的三种节点角色。
-order: 2
+order: 3
 category: getting-started
 ---
 

@@ -11,7 +11,7 @@ export const zhHant = {
       "SoyaOS 同一份二進位、六種部署型態——Solo、Cluster、Cloud、Hybrid、Enterprise Cloud、Enterprise Private。先挑現在合適的,未來切換不必重寫。",
     pricingTitle: "定價 · SoyaOS",
     pricingDescription:
-      "Alpha 期間 SoyaOS 對所有人免費——MIT 開源、零遙測、無用量上限。未來雲端版本將採 token + 秒計沙箱計費;核心永遠 MIT。",
+      "Solo 永遠 MIT 開源；Cloud v0.2.0 目前免費並設有每日額度。付費方案、計量和帳單尚未上線。",
     docsTitle: "文件 · SoyaOS",
   },
 
@@ -120,24 +120,25 @@ export const zhHant = {
         lead: "所謂",
         em: "版本",
         tail:
-          "並不是不同的產品——只是 Planet(控制面)、Moon(介面 / 邊緣)、Comet(工作節點)跑在哪裡、由誰維運而已。變的只有一個 CLI 參數。",
+          "描述控制面與工作負載跑在哪裡、由誰維運。Solo 使用本機二進位；Cloud v0.2.0 透過代管入口網站和 API 使用。",
       },
-      codeComment: "# 或 cluster | cloud | hybrid | ...",
+      codeComment: "# 本機 Solo 入口",
     },
     table: {
       colEdition: "版本",
-      colCli: "CLI",
+      colCli: "入口",
       colPersona: "適用對象",
       colCost: "典型成本",
       colStatus: "狀態",
       badgeAlpha: "alpha 在用",
+      badgeStable: "Stable v0.2.0",
       badgePlanned: "規劃中",
     },
     detail: {
       eyebrow: "各元件在哪裡",
       title: "每個版本的控制面 vs. 資料面。",
       intro:
-        "同一份二進位,六個切分點。唯一可調的旋鈕:「你自己維運」與「我們替你維運」的邊界畫在哪裡。",
+        "Solo 與 Cloud 已可使用；其餘型態仍是路線圖。Cloud v0.2.0 是受控文字 Agent 服務，不等同於完整 Cloud 終態架構。",
       controlPlane: "控制面",
       dataPlane: "資料面",
     },
@@ -160,11 +161,11 @@ export const zhHant = {
       },
       {
         persona: "註冊帳號、拿 API Key、開工。",
-        cost: "按 token + 按 Comet·秒",
-        controlPlane: "soyaos.ai 代管 Planet",
-        dataPlane: "soyaos.ai 代管 Comet",
+        cost: "目前免費 · 有每日額度",
+        controlPlane: "SoyaOS 代管個人租戶與 API Key",
+        dataPlane: "平台審核的代管文字 Agent",
         description:
-          "Planet 和 Comet 都由我們維運,你只持有 API Key。隨時切到你自己的 BYOK 模型 Key,自此只為算力付費、不再為推理付費。",
+          "Stable v0.2.0：使用 GitHub 登入、建立 API Key，透過 OpenAI 相容 API 呼叫 soya:starter，並查看 24 小時 Trace 中繼資料。目前免費、單區、best-effort、無 SLA。",
       },
       {
         persona: "SaaS Planet,你自己的 Moon。",
@@ -194,22 +195,22 @@ export const zhHant = {
     closing: {
       title: "不確定哪個合適?",
       bodyParts: {
-        lead: "先用 ",
-        solo: "solo",
-        mid: " 起步。等到筆電風扇響起來,升級到 ",
-        cluster: "cluster",
-        tail: "。其餘都是同一個核心。",
+        lead: "不想安裝或維運，選擇 ",
+        solo: "Cloud",
+        mid: "；想完全在自己的電腦上執行，選擇 ",
+        cluster: "Solo",
+        tail: "。其餘型態仍在規劃中。",
       },
-      cta: "下載 v0.1",
+      cta: "Cloud 快速上手",
     },
   },
 
   pricing: {
     hero: {
       pill: "定價",
-      title: "Alpha 期間對所有人免費。",
+      title: "Solo 與 Cloud v0.2.0 目前免費。",
       subtitle:
-        "SoyaOS 是 MIT 開源軟體。我們目前尚未營運代管雲,所以沒有計量、沒有 Key、沒有方案要選。",
+        "Solo 是 MIT 開源軟體。Cloud 已作為 Stable v0.2.0 運行，使用 API Key 和每日額度，但沒有付費方案、計量帳單或 SLA。",
     },
     banner: {
       eyebrow: "Alpha",
@@ -228,12 +229,12 @@ export const zhHant = {
       eyebrow: "未來的商業化",
       title: "GA 之後的計畫。",
       intro:
-        "下列項目目前皆未上線、未計費。先把意圖揭露出來,方便日後對照我們實際推出的版本。",
+        "Cloud v0.2.0 已上線且免費；下列付費、BYOK、沙箱與企業能力仍未上線，也尚未開始計費。",
       futureLabel: "Future",
       list: [
         {
-          title: "Cloud 版本",
-          body: "按 token + 按秒沙箱(gpu·s / vcpu·s)——一個透明的雲端 LLM 提供者。隨時切到自己的 BYOK Key,自此只為我們實際排程的算力付費、不再為推理付費。",
+          title: "Cloud 未來付費方案",
+          body: "計畫按 token 與沙箱秒提供透明計量，並評估 BYOK。它不是 v0.2.0 的目前能力或收費承諾。",
         },
         {
           title: "Enterprise",
@@ -271,7 +272,7 @@ export const zhHant = {
   docs: {
     indexTitle: "文件",
     indexIntro:
-      "跑通第一個 SoyaOS Agent 所需的全部資訊。五篇參考文件涵蓋:安裝、三種節點角色、SoyaPack 清單、v0 CLI。",
+      "從代管 Cloud 或本機 Solo 跑通第一個 SoyaOS Agent，並繼續了解架構、SoyaPack、API 與 CLI。",
     indexCtaQuickstart: "從快速上手開始",
     searchPlaceholder: "搜尋文件……",
     searchLabel: "搜尋",
