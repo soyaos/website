@@ -12,7 +12,7 @@
  *     (en). Don't push Chinese onto a user who already told us they don't
  *     read it.
  *   - 302 redirect (never rewrite) so the user lands on the canonical
- *     `/<locale>/` URL.
+ *     `/<locale>` URL.
  *
  * Kept in plain JS so it can be served straight out of `public/` without a
  * build step.
@@ -29,6 +29,8 @@ const DISCOVERY_CONTENT_TYPES = new Map([
   ["/llms.txt", "text/markdown; charset=utf-8"],
 ]);
 const LOCALIZABLE_PATH = /^\/(?:editions|pricing|docs(?:\/.*)?)\/?$/;
+const LOCALIZED_HTML_WITH_TRAILING_SLASH =
+  /^\/(?:zh|zh-hant|en)(?:\/(?:editions|pricing|docs(?:\/[^.]+)*))?\/$/;
 
 function mapToLocale(tag) {
   const lower = tag.toLowerCase().trim();
@@ -83,7 +85,7 @@ export default {
     // served by the static asset binding.
     if (url.pathname === "/") {
       const locale = pickLocale(request.headers.get("accept-language"));
-      const dest = new URL(`/${locale}/`, url);
+      const dest = new URL(`/${locale}`, url);
       dest.search = url.search;
       return Response.redirect(dest.toString(), 302);
     }
@@ -93,9 +95,19 @@ export default {
     // authority after the 302.
     if (LOCALIZABLE_PATH.test(url.pathname)) {
       const locale = pickLocale(request.headers.get("accept-language"));
-      const dest = new URL(`/${locale}${url.pathname}`, url);
+      const canonicalPath = url.pathname.replace(/\/$/, "");
+      const dest = new URL(`/${locale}${canonicalPath}`, url);
       dest.search = url.search;
       return Response.redirect(dest.toString(), 302);
+    }
+
+    // Existing localized HTML URLs used directory-style trailing slashes.
+    // Redirect only known public HTML routes so file-like, API and unknown
+    // paths keep their original semantics. 308 preserves method and query.
+    if (LOCALIZED_HTML_WITH_TRAILING_SLASH.test(url.pathname)) {
+      const dest = new URL(url);
+      dest.pathname = url.pathname.slice(0, -1);
+      return Response.redirect(dest.toString(), 308);
     }
 
     // `/llm.txt` was never a public contract. Reject it explicitly so a
@@ -131,7 +143,7 @@ export default {
     headers.set("cache-control", "public, max-age=300");
     headers.set("content-disposition", "inline");
     headers.set("content-type", "text/markdown; charset=utf-8");
-    headers.set("link", `<${CANONICAL_ORIGIN}${canonicalPath}/>; rel="canonical"`);
+    headers.set("link", `<${CANONICAL_ORIGIN}${canonicalPath}>; rel="canonical"`);
     headers.set("x-robots-tag", "noindex");
     return new Response(request.method === "HEAD" ? null : response.body, {
       status: response.status,

@@ -13,7 +13,7 @@ function escapeXml(value: string): string {
 }
 
 function canonicalPath(locale: Locale, path: string): string {
-  return `/${locale}${path}/`;
+  return `/${locale}${path}`;
 }
 
 function localizedPaths(entries: CollectionEntry<"docs">[]): string[] {

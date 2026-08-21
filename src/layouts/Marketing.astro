@@ -40,25 +40,25 @@ const dict = getDictionary(locale);
 const title = titleOverride ?? dict.meta.siteTitle;
 const description = descriptionOverride ?? dict.meta.homeDescription;
 
-const localeAgnosticPath = path ?? stripLocale(Astro.url.pathname);
+const localeAgnosticPath = path ?? stripLocale(Astro.url.pathname.replace(/\.html$/, ""));
 const cleanPath = localeAgnosticPath === "/"
   ? ""
   : localeAgnosticPath.replace(/\/$/, "");
 
 const baseOrigin = "https://soyaos.ai";
 
-const canonical = `${baseOrigin}/${locale}${cleanPath}/`;
+const canonical = `${baseOrigin}/${locale}${cleanPath}`;
 const markdownAlternate = `${baseOrigin}/${locale}${cleanPath}.md`;
 
 // hreflang map per Google Search Central — keys use BCP-47 standard casing.
 const languageAlternates: Record<string, string> = {};
 for (const l of locales) {
-  languageAlternates[localeBcp47[l]] = `${baseOrigin}/${l}${cleanPath}/`;
+  languageAlternates[localeBcp47[l]] = `${baseOrigin}/${l}${cleanPath}`;
 }
 // x-default points at the home-market locale (matches Accept-Language §3.3
 // "missing header" branch). Search engines pick this when they have no
 // language preference signal.
-languageAlternates["x-default"] = `${baseOrigin}/${defaultLocale}${cleanPath}/`;
+languageAlternates["x-default"] = `${baseOrigin}/${defaultLocale}${cleanPath}`;
 
 const ogLocale = localeOg[locale];
 const ogAlternateLocales = locales

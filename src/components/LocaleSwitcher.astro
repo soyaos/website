@@ -23,7 +23,9 @@ const dict = getDictionary(locale);
  * patches them in on click so `/en/pricing?ref=cta#faq` round-trips to
  * `/zh/pricing?ref=cta#faq` after switching.
  */
-const currentPath = Astro.url.pathname;
+// `build.format: "file"` exposes the generated `.html` filename through
+// Astro.url during static builds. Public URLs remain extensionless.
+const currentPath = Astro.url.pathname.replace(/\.html$/, "");
 const pathWithoutLocale = stripLocale(currentPath);
 
 const items = locales.map((l) => ({

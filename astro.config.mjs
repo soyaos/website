@@ -13,6 +13,13 @@ import tailwind from "@astrojs/tailwind";
  */
 export default defineConfig({
   site: "https://soyaos.ai",
+  // Emit `route.html` instead of `route/index.html`. Cloudflare Pages serves
+  // the former at `/route`, so canonical public URLs stay slashless while
+  // the hostname root `/` remains the only unavoidable slash URL.
+  trailingSlash: "never",
+  build: {
+    format: "file",
+  },
   i18n: {
     defaultLocale: "zh",
     locales: ["zh", "zh-hant", "en"],

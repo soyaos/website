@@ -18,7 +18,7 @@ function assert(condition, message) {
 
 for (const locale of locales) {
   for (const path of editorialPaths) {
-    const htmlPath = path ? `${locale}${path}/index.html` : `${locale}/index.html`;
+    const htmlPath = path ? `${locale}${path}.html` : `${locale}.html`;
     const markdownPath = path ? `${locale}${path}.md` : `${locale}.md`;
     const html = read(htmlPath);
     const markdown = read(markdownPath);
@@ -29,7 +29,7 @@ for (const locale of locales) {
     );
     assert(markdown.startsWith("# "), `${markdownPath} has no heading`);
     assert(
-      markdown.includes(`Canonical HTML: https://soyaos.ai/${locale}${path}/`),
+      markdown.includes(`Canonical HTML: https://soyaos.ai/${locale}${path}`),
       `${markdownPath} has no canonical source pointer`,
     );
   }
@@ -52,10 +52,10 @@ assert(robots.includes("Sitemap: https://soyaos.ai/sitemap.xml"), "robots has no
 const sitemap = read("sitemap.xml");
 const sitemapLocations = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
 assert(sitemapLocations.length === 48, "sitemap must contain 48 canonical HTML URLs");
-assert(sitemapLocations.every((url) => url.endsWith("/") && !url.endsWith(".md/")), "sitemap contains a non-canonical URL");
+assert(sitemapLocations.every((url) => !new URL(url).pathname.endsWith("/")), "sitemap contains a trailing-slash URL");
 for (const url of sitemapLocations) {
   const path = new URL(url).pathname.slice(1);
-  assert(read(`${path}index.html`).includes(`rel="canonical" href="${url}"`), `${url} is not a canonical 200 build output`);
+  assert(read(`${path}.html`).includes(`rel="canonical" href="${url}"`), `${url} is not a canonical 200 build output`);
 }
 assert((sitemap.match(/hreflang="zh-CN"/g) ?? []).length === 48, "sitemap zh alternates are incomplete");
 assert((sitemap.match(/hreflang="zh-Hant"/g) ?? []).length === 48, "sitemap zh-hant alternates are incomplete");
@@ -77,7 +77,7 @@ const response = await worker.fetch(
 assert(response.headers.get("content-type") === "text/markdown; charset=utf-8", "wrong Markdown content type");
 assert(response.headers.get("x-robots-tag") === "noindex", "Markdown must be noindex");
 assert(
-  response.headers.get("link") === '<https://soyaos.ai/zh/docs/quickstart/>; rel="canonical"',
+  response.headers.get("link") === '<https://soyaos.ai/zh/docs/quickstart>; rel="canonical"',
   "wrong Markdown canonical Link header",
 );
 
@@ -105,6 +105,18 @@ for (const testCase of [
   );
   assert(negotiated.status === 302, `locale-less docs status for ${testCase.header}`);
   assert(negotiated.headers.get("location") === testCase.location, `locale-less docs location for ${testCase.header}`);
+}
+
+for (const path of ["/en/", "/en/docs/", "/zh/docs/scope-events/"]) {
+  const canonical = await worker.fetch(
+    new Request(`https://soyaos.ai${path}?from=legacy`),
+    { ASSETS: { fetch: async () => new Response("must not run") } },
+  );
+  assert(canonical.status === 308, `${path} must permanently redirect`);
+  assert(
+    canonical.headers.get("location") === `https://soyaos.ai${path.slice(0, -1)}?from=legacy`,
+    `${path} has the wrong slashless location`,
+  );
 }
 
 console.log("public discovery contract: 48 HTML/Markdown pairs verified");

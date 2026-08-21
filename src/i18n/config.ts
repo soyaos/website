@@ -57,7 +57,7 @@ export function stripLocale(pathname: string): string {
 /** Build a path with the given locale prefix. */
 export function withLocale(locale: Locale, path: string): string {
   const clean = path.startsWith("/") ? path : `/${path}`;
-  if (clean === "/") return `/${locale}/`;
+  if (clean === "/") return `/${locale}`;
   return `/${locale}${clean}`;
 }
 
